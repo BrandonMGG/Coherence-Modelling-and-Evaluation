@@ -97,7 +97,7 @@ class Controller:
             self.core_board.animation_access("write hit")
             block_id = block.get_id()
             time.sleep(CACHE_WR_DELAY)
-            self.cache.set(block_id, "M", address, value)
+            self.cache.set(block_id, address"M", address, value)
             self.cache.animation(block_id, HIGHLIGHT_HIT)
 
         else:
@@ -113,8 +113,8 @@ class Controller:
         address = int(address, 2)
         set_num = address % 2
         blocks = self.cache.get_blocks_in_set(set_num)
-        #writing_policy = ["I", "E", "S", "M", "O"]
-        writing_policy = ["I", "E", "S", "M"]
+        writing_policy = ["I", "E", "S", "M", "O"]
+        #writing_policy = ["I", "E", "S", "M"]
         for state in writing_policy:
             for block in blocks:
                 if block.get_state() == state:
