@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CACHE_SIZE 8
+#define CACHE_SIZE 4
 
 // Estados de los bloques de caché
 typedef enum {
@@ -87,7 +87,7 @@ void getCacheBlockInfo(Cache* cache, int tag) {
 
     printf("Cache Block Info: Tag: %d, State: %s, Value: %d\n", tag, state_str, block.data);
 }
-
+/*
 int main() {
     Cache cache;
     initializeCache(&cache);
@@ -104,6 +104,7 @@ int main() {
     setCacheBlockState(&cache, 2, EXCLUSIVE);
 
     getCacheBlockInfo(&cache, 2);
-    
+
     return 0;
 }
+*/
