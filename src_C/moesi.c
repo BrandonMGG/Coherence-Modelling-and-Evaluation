@@ -18,6 +18,11 @@ typedef enum {
     BUSWRITE
 } MOESIEvent;
 
+//When a processing core needs read permission for a particular cache block (Rd)
+// it issues a GetS request if it has not read permission for that block (Rd/GetS)
+
+//Necesitamos var para saber si un PE tiene RD/WR permission?
+
 // Función para realizar una transición de estado
 MOESIState transition(MOESIState current_state, MOESIEvent event) {
     MOESIState new_state = current_state;
@@ -29,10 +34,13 @@ MOESIState transition(MOESIState current_state, MOESIEvent event) {
             } else if (event == BUSREAD) {
                 new_state = OWNED;
             } else if (event == READ) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
-            } else if (event == BUSREADX) {
+            //} else if (event == BUSREADX) {
+            //} else if (event == BUSREAD) {
                 // Acción: No hace nada en este estado
             } else if (event == WRITE) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
             }
             break;
@@ -41,13 +49,15 @@ MOESIState transition(MOESIState current_state, MOESIEvent event) {
             if (event == WRITE) {
                 new_state = MODIFIED;
             } else if (event == BUSWRITE) {
+                // que pasa en caso Wr/getX
                 new_state = INVALID;
             } else if (event == BUSREAD) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
-            } else if (event == BUSREADX) {
+            //} else if (event == BUSREADX) {
                 // Acción: No hace nada en este estado
             } else if (event == READ) {
-                // Acción: No hace nada en este estado
+                new_state = current_state;
             }
             break;
 
@@ -59,36 +69,43 @@ MOESIState transition(MOESIState current_state, MOESIEvent event) {
             } else if (event == BUSWRITE) {
                 new_state = INVALID;
             } else if (event == READ) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
-            } else if (event == BUSREADX) {
+            //} else if (event == BUSREADX) {
                 // Acción: No hace nada en este estado
             }
             break;
 
         case SHARED:
             if (event == WRITE) {
+                //que pasa con getX
                 new_state = MODIFIED;
             } else if (event == BUSWRITE) {
                 new_state = INVALID;
             } else if (event == BUSREAD) {
                 // Acción: No hace nada en este estado
-            } else if (event == BUSREADX) {
+            //} else if (event == BUSREADX) {
                 // Acción: No hace nada en este estado
             } else if (event == READ) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
             }
             break;
 
         case INVALID:
             if (event == WRITE) {
+                //que pasa con getX
                 new_state = MODIFIED;
             } else if (event == READ) {
+                //que pasa con getS
                 new_state = EXCLUSIVE;
             } else if (event == BUSREAD) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
-            } else if (event == BUSREADX) {
+            //} else if (event == BUSREADX) {
                 // Acción: No hace nada en este estado
             } else if (event == BUSWRITE) {
+                new_state = current_state;
                 // Acción: No hace nada en este estado
             }
             break;
