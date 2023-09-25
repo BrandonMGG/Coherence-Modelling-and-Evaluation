@@ -32,7 +32,7 @@ void set_data_in_memory(struct memory *mem, char *address, int data) {
   printf("Memory address not found.\n");
 }
 
-int main() {
+int test() {
   struct memory main_memory;
 
   memory_init(&main_memory);

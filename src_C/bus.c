@@ -1,24 +1,51 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "../include/memory.h"
+#include "../include/bus.h"
+
+/**
+ * Bus abstraction
+*/
 
 void process_readmiss(){
-    /*
-    if (cpu->state == MODIFIED || cpu->state == OWNED ){
-        //WRITE MEMORIA preform_wb wb bus.py
-    }
-    if //Revisar si las otras caches tienen el address en su cache 
-        //Si no hay colocar estado en SHARED
-    else revisar si el address en otra cache tienen estado EXCLUSIVE o SHARED
-        if si leer en memoria 
-        else set estado SHARED
-    */
+
 }
 
 void process_writemiss(){
-    /*
-    if state == MODIFIED || state == OWNED write en memoria perform_wb en bus.py
-    State O guardar dato en cache y camnbiar estado a MODIFIED
-    Invalidad address a todas las caches
-    
-    */
+
+}
+
+void perform_wb(char * dirty_address, int dirty_data, struct bus *bus){
+  //Needs delay to simulate latency
+  set_data_in_memory(&(bus->main_memory), dirty_address, dirty_data);
+}
+
+int seek_owned(char * local_address, int requester_id){
+
+}
+
+int seek_shared(char * local_address, int requester_id){
+
+}
+
+void seek_invalidate(char * local_address, int requester_id){
+
+}
+
+
+int main() {
+  //main memory test
+  test();
+
+  struct memory main_memory;
+  struct bus my_bus;
+
+  //Bus ops testing
+  memory_init(&main_memory);
+  my_bus.main_memory = main_memory; 
+
+  perform_wb("F", 65, &my_bus);
+
+  int data = get_data_from_memory(&(my_bus.main_memory), "F");
+  printf("Data at address 0xf: %d\n", data);
+
+  return 0;
 }

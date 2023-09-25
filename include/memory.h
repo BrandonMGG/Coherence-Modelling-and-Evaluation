@@ -3,6 +3,7 @@
 #define MEM_SIZE 16 // 16 blocks of memory
 #define DATA_SIZE 4 // each char value is 1 byte long, so data is 4 bytes long or 32-bit
 
+
 struct memory_block {
   char address[DATA_SIZE];
   int data;
@@ -11,6 +12,7 @@ struct memory_block {
 struct memory {
   struct memory_block entries[MEM_SIZE];
 };
+
 
 /**
  * Initializes the memory structure.
