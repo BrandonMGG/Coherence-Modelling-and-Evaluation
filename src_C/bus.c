@@ -33,7 +33,7 @@ void seek_invalidate(char * local_address, int requester_id){
 
 int main() {
   //main memory test
-  test();
+  //test();
 
   struct memory main_memory;
   struct bus my_bus;
