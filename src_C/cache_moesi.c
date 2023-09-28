@@ -9,12 +9,14 @@ typedef enum {
     EXCLUSIVE,
     SHARED,
     MODIFIED,
-    OWNED
+    OWNED,
+    UNKNOWN
 } CacheState;
 
 // Bloque de caché
 typedef struct {
     CacheState state;
+    int address;
     int tag;
     int data;
 } CacheBlock;
@@ -34,39 +36,113 @@ void initializeCache(Cache* cache) {
 }
 
 // Escribe un bloque en la caché
-void writeCacheBlock(Cache* cache, int tag, int data) {
-    int index = tag % CACHE_SIZE;
-    if (cache->blocks[index].state == INVALID) {
-        cache->blocks[index].state = MODIFIED;
-        printf("Write to Cache: MISS, Tag: %d, Value: %d, State: MODIFIED\n", tag, data);
+void writeCacheBlock(Cache* cache, int address, int data) {
+    int index = 0;
+    char message[10] = " ";
+    for(int i=0; i<CACHE_SIZE; i++){
+        //Ver si existe la direccion de memoria en cache
+        if(cache->blocks[i].address == address){
+            index = cache->blocks[i].tag;
+            strcpy((char*)message, "Write Cache Hit");
+        }else{
+            //no existe en cache
+            /*enviar mensaje de message = {
+                    "id": core_name,
+                    "access": AccessType.writemiss,
+                    "address": address,
+                    "value": value,
+                    "block_id": self._get_block_id_with_writing_policy(address),
+                }*/
+            strcpy((char*)message, "Write Cache Miss");
+        }
+        
     }
-    else {
-        cache->blocks[index].state = MODIFIED;
-        printf("Write to Cache: HIT, Tag: %d, Value: %d, State: MODIFIED\n", tag, data);
+
+    if (message == "Write Cache Hit"){
+        if(cache->blocks[index].state != MODIFIED || cache->blocks[index].state != EXCLUSIVE){
+            /*enviar mensaje de message = {
+                    "id": core_name,
+                    "access": AccessType.writemiss,
+                    "address": address,
+                    "value": value,
+                    "block_id": block.get_id(),
+                }*/
+            strcpy((char*)message, "Write Cache Miss");
+        }else{
+            cache->blocks[index].state = MODIFIED;
+            cache->blocks[index].data = data;
+            strcpy((char*)message, "Write Cache Hit");
+        }
+        
     }
-    cache->blocks[index].tag = tag;
-    cache->blocks[index].data = data;
+    
 }
 
 // Lee un bloque de la caché
-int readCacheBlock(Cache* cache, int tag) {
-    int index = tag % CACHE_SIZE;
-    if (cache->blocks[index].state != INVALID && cache->blocks[index].tag == tag) {
-        if (cache->blocks[index].state == MODIFIED) {
-            cache->blocks[index].state = SHARED;
-            printf("Read from Cache: HIT, Tag: %d, Value: %d, State: SHARED\n", tag, cache->blocks[index].data);
+int readCacheBlock(Cache* cache, int address) {
+    int index = 0;
+    char message[10] = " ";
+    for(int i=0; i<CACHE_SIZE; i++){
+        //Ver si existe la direccion de memoria en cache
+        if(cache->blocks[i].address == address){
+            index = cache->blocks[i].tag;
+            if(cache->blocks[index].state != INVALID){
+                //retorna valor de cache
+                strcpy((char*)message, "Read Cache Hit");
+            }else{
+                //si existe pero esta en Invalid
+                /*enviar mensaje de message = {
+                        "id": core_name,
+                        "access": AccessType.readmiss,
+                        "address": address,
+                        "value": value,
+                        "block_id": block_id,
+                    }*/
+                strcpy((char*)message, "Read Cache Miss");
+            }
+        }else{
+            //no existe en cache
+            /*enviar mensaje de message = {
+                    "id": core_name,
+                    "access": AccessType.readmiss,
+                    "address": address,
+                    "value": value,
+                    "block_id": self._get_block_id_with_writing_policy(address),
+                }*/
+            strcpy((char*)message, "Read Cache Miss");
         }
-        else {
-            printf("Read from Cache: HIT, Tag: %d, Value: %d, State: %s\n", tag, cache->blocks[index].data, cache->blocks[index].state == EXCLUSIVE ? "EXCLUSIVE" : "SHARED");
-        }
-        return cache->blocks[index].data; // Cache hit
-    }
-    else {
-        printf("Read from Cache: MISS, Tag: %d, Value: -1, State: INVALID\n", tag);
-        return -1; // Cache miss
+        
     }
 }
 
+// Función para seleccionar un bloque de caché con política write-back
+int getBlockIdWithWriteBackPolicy(Cache* cache, int cacheSize) {
+    // Primero, busca bloques en estado 'M' (Modified)
+    for (int i = 0; i < CACHE_SIZE; i++) {
+        if (cache[i].blocks->state == MODIFIED) {
+            return cache[i].blocks->tag;
+        }
+    }
+
+    // Si no hay bloques en estado 'M', busca bloques en estado 'E' (Exclusive)
+    for (int i = 0; i < CACHE_SIZE; i++) {
+        if (cache[i].blocks->state == EXCLUSIVE) {
+            return cache[i].blocks->tag;
+        }
+    }
+
+    // Si no hay bloques en estado 'M' ni 'E', selecciona el primer bloque en la caché
+    if (CACHE_SIZE > 0) {
+        return cache[0].blocks->tag;
+    }
+
+    // Error - Política de escritura write-back
+    printf("Error - Write-Back Policy\n");
+    return -1;
+}
+
+
+/*
 // Establece el estado de un bloque de caché dado su tag
 void setCacheBlockState(Cache* cache, int tag, CacheState state) {
     int index = tag % CACHE_SIZE;
@@ -86,7 +162,7 @@ void getCacheBlockInfo(Cache* cache, int tag) {
                             (block.state == INVALID) ? "OWNED":
 
     printf("Cache Block Info: Tag: %d, State: %s, Value: %d\n", tag, state_str, block.data);
-}
+}*/
 /*
 int main() {
     Cache cache;

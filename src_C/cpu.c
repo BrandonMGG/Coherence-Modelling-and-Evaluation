@@ -23,26 +23,10 @@ void execute_instruction(struct CPU* cpu, struct Instruction* instr) {
     //printf("\n");
 
     if (strcmp(instr->op, read_char) == 0){
-        if (cpu->cache.blocks->state == INVALID){
-            //WRITE BACK POLICY
-            //READ MISS FOR THE BUS 
-        }
-        else{
-            //READ HIT
-        }
+        readCacheBlock(&cpu->cache,instr->address);
         
     }else if (strcmp(instr->op, write_char) == 0){
-        if(cpu->cache.blocks->state == MODIFIED || cpu->cache.blocks->state == EXCLUSIVE){
-            //write hit 
-            //Cambiar estado a MODIFIED
-        }
-        else if (cpu->cache.blocks->state == UNKNOWN){
-            //write back policy
-            //write miss for the bus
-        }
-        else {
-            //write miss
-        }
+        writeCacheBlock(&cpu->cache,instr->address,instr->data);
     }
     else if (strcmp(instr->op, incr_char) == 0){
         //Leer dato, sumar 1 y escribir dato en memoria 
