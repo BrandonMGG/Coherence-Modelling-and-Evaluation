@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <mqueue.h>
+#include "../include/messages.h"
 
 #define MAX_MESSAGES 10
 #define MAX_MSG_SIZE 1024

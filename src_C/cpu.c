@@ -19,14 +19,14 @@ void execute_instruction(struct CPU* cpu, struct Instruction* instr) {
     printf("CPU %c - Ejecutando instrucción:\n", cpu->id);
     printf("  Operación: %s\n", instr->op);
     printf("  Dirección: %s\n", instr->address);
-    printf("  Datos: %s\n", instr->data);
+    printf("  Datos: %d\n", instr->data);
     //printf("\n");
 
     if (strcmp(instr->op, read_char) == 0){
-        readCacheBlock(&cpu->cache,instr->address);
+        readCacheBlock(&cpu->cache,instr->address, cpu->id);
         
     }else if (strcmp(instr->op, write_char) == 0){
-        writeCacheBlock(&cpu->cache,instr->address,instr->data);
+        writeCacheBlock(&cpu->cache,instr->address,instr->data,cpu->id);
     }
     else if (strcmp(instr->op, incr_char) == 0){
         //Leer dato, sumar 1 y escribir dato en memoria 
@@ -40,6 +40,7 @@ int main() {
     // Crear una instancia de CPU
     struct CPU cpu;
     cpu.id = 'A'; // Puedes asignar cualquier identificador que desees
+    initializeCache(&cpu.cache);
 
     // Crear una estructura para almacenar la instrucción generada aleatoriamente
     struct Instruction instr;

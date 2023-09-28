@@ -7,8 +7,8 @@
 // Estructura para representar una instrucción
 struct Instruction {
     char op[10];
-    char address[6];
-    char data[5];
+    char address[4];
+    int data;
 };
 
 // Función para generar un número aleatorio en punto flotante entre 0 y 1
@@ -48,14 +48,20 @@ int random_Hex() {
 }
 
 // Función para obtener datos aleatorios en formato hexadecimal
-char* get_random_data() {
-    static char hex_chars[] = "0123456789ABCDEF";
-    char* data = (char*)malloc(5);
-    for (int i = 0; i < 4; i++) {
-        data[i] = hex_chars[randint(0, 15)];
-    }
-    data[4] = '\0';
-    return data;
+int get_random_data() {
+    int value;
+    char hexString[10]; // Ajusta el tamaño según tus necesidades
+
+    // Genera un valor entero aleatorio (por ejemplo, entre 0 y 255)
+    value = rand() % 256;
+
+    // Convierte el valor entero a una cadena de caracteres hexadecimal
+    sprintf(hexString, "%X", value);
+
+    // Convierte la cadena hexadecimal nuevamente a un valor entero
+    int result = strtol(hexString, NULL, 16);
+
+    return result;
 }
 
 // Función para obtener una instrucción aleatoria y almacenarla en una estructura
@@ -66,15 +72,15 @@ void get_random_instruction(struct Instruction* instr) {
     if (op_index == 1) {
         sprintf(instr->op, "READ");
         sprintf(instr->address, "0x%X", random_Hex());
-        sprintf(instr->data,  "0");
+        instr->data = 0;
     } else if (op_index == 2) {
         sprintf(instr->op, "WRITE");
         sprintf(instr->address, "0x%X", random_Hex());
-        sprintf(instr->data, "%s", get_random_data());
+        instr->data = get_random_data();
     } else {
         sprintf(instr->op, "INCR");
         sprintf(instr->address, "0x%X", random_Hex());
-        sprintf(instr->data, "0");
+        instr->data= 0;
     }
 }
 
