@@ -4,8 +4,8 @@
 
 struct bus {
   struct memory main_memory;
-  int channel;
-  int cpus[N_CPU];
+  struct Message channel;
+  struct CPU cpus[N_CPU];
 };
 
 /*
@@ -18,6 +18,9 @@ else revisar si el address en otra cache tienen estado EXCLUSIVE o SHARED
     if si leer en memoria 
     else set estado SHARED
 */
+
+Cache get_core_cache(int cpu_id, struct bus *bus);
+
 void process_readmiss();
 
     /*
@@ -30,8 +33,8 @@ void process_writemiss();
 
 void perform_wb(char * dirty_address, int dirty_data, struct bus *bus);
 
-int seek_owned(char * local_address, int requester_id);
+int seek_owned(char * local_address, int requester_id, struct bus *bus);
 
-int seek_shared(char * local_address, int requester_id);
+int seek_shared(char * local_address, int requester_id, struct bus *bus);
 
-void seek_invalidate(char * local_address, int requester_id);
+void seek_invalidate(char * local_address, int requester_id, struct bus *bus);

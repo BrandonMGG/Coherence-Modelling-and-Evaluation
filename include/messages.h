@@ -1,5 +1,3 @@
-#ifndef MESSAGES_H
-#define MESSAGES_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +6,7 @@
 #define MAX_MESSAGES 10
 
 struct Message {
-    char id[64];
+    int id;
     int access;
     char address[128];
     int block_id;
@@ -17,5 +15,3 @@ struct Message {
 mqd_t create_message_queue();
 void send_message(mqd_t mq, struct Message *message);
 void cleanup_message_queue(mqd_t mq);
-
-#endif

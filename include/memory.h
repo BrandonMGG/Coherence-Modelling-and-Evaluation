@@ -8,7 +8,6 @@ struct memory_block {
   char address[DATA_SIZE];
   int data;
 };
-
 struct memory {
   struct memory_block entries[MEM_SIZE];
 };
