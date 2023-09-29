@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-#define ARRAY_SIZE 8
-
-// Estructura para representar una instrucción
-struct Instruction {
-    char op[10];
-    char address[4];
-    int data;
-};
+#include "../include/random_instruction.h"
 
 // Función para generar un número aleatorio en punto flotante entre 0 y 1
 double random_m() {
@@ -65,7 +54,7 @@ int get_random_data() {
 }
 
 // Función para obtener una instrucción aleatoria y almacenarla en una estructura
-void get_random_instruction(struct Instruction* instr) {
+void get_random_instruction(struct Instruction *instr) {
     int n = 1; // Número de tipos de instrucciones: "READ", "WRITE", "CALC"
     int op_index = geometric(n, n - 1);
 

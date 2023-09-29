@@ -1,4 +1,5 @@
 #define CACHE_SIZE 4
+#define SIZE 4
 
 // Estados de los bloques de caché
 typedef enum {

@@ -6,8 +6,6 @@
 #include "../include/messages.h"
 #include "../include/cache.h"
 
-
-
 // Inicializa la caché
 void initializeCache(Cache* cache) {
     for (int i = 0; i < CACHE_SIZE; i++) {
@@ -18,7 +16,7 @@ void initializeCache(Cache* cache) {
 }
 
 // Escribe un bloque en la caché
-void writeCacheBlock(Cache* cache, char address[CACHE_SIZE], int data, int id) {
+void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id) {
     //mqd_t mq;
     //mq = create_message_queue();
     //srand(time(NULL));
@@ -54,7 +52,7 @@ void writeCacheBlock(Cache* cache, char address[CACHE_SIZE], int data, int id) {
         
     }
 
-    if (message1 == "Write Cache Hit"){
+    if (strcmp(message1, "Write Cache Hit") == 0){
         if(cache->blocks[index].state != MODIFIED || cache->blocks[index].state != EXCLUSIVE){
             /*enviar mensaje de message = {
                     "id": core_name,
@@ -85,7 +83,7 @@ void writeCacheBlock(Cache* cache, char address[CACHE_SIZE], int data, int id) {
 }
 
 // Lee un bloque de la caché
-int readCacheBlock(Cache* cache, char address[CACHE_SIZE], int id) {
+int readCacheBlock(Cache* cache, char address[SIZE], int id) {
     int index = 0;
     char message2[20] = " ";
     struct Message message;
@@ -137,6 +135,7 @@ int readCacheBlock(Cache* cache, char address[CACHE_SIZE], int id) {
         }
         
     }
+    return 0;
 }
 
 // Función para seleccionar un bloque de caché con política write-back
@@ -175,18 +174,16 @@ void setCacheBlockState(Cache* cache, int tag, CacheState state) {
 }
 */
 // Obtiene información de un bloque de caché dado su tag
-int getCacheBlock_by_address(Cache* cache, char address[CACHE_SIZE]) {
-    int index =0;
-    for(int i=0; i<CACHE_SIZE; i++){
+int getCacheBlock_by_address(Cache* cache, char address[SIZE]) {
+    int index = 0;
+    for(int i = 0; i<CACHE_SIZE; i++){
         //Ver si existe la direccion de memoria en cache
         if(cache->blocks[i].address == address){
             index = cache->blocks[i].tag;
             return index;
-        }else{
-            return (-1);
-        }
-        
+        }        
     }
+    return -1;
 }
 /*
 int main() {

@@ -1,12 +1,20 @@
 #include "../include/memory.h"
-#include "../include/bus.h"
+#include "../include/cache.h"
+#include "../include/random_instruction.h"
 #include "../include/cpu.h"
+#include "../include/messages.h"
+#include "../include/bus.h"
+
 /**
  * Bus abstraction
 */
 
 Cache get_core_cache(int cpu_id, struct bus *bus){
   return bus->cpus[cpu_id].cache;
+}
+
+void set_core_cache_block_state(int cpu_id, int block_index, struct bus *bus, int state){
+  bus->cpus[cpu_id].cache.blocks[block_index].state = state;
 }
 
 void process_readmiss(){
@@ -24,54 +32,83 @@ void perform_wb(char * dirty_address, int dirty_data, struct bus *bus){
 
 int seek_owned(char * local_address, int requester_id, struct bus *bus){
 
-}
-
-int seek_shared(char * local_address, int requester_id, struct bus *bus){
   for (int core_id = 0; core_id < N_CPU; core_id++){
     if (core_id != requester_id){
-      struct Cache *local_cache = get_core_cache(core_id, &bus);
-      /**
-       * IMPLEMENTAR EN CPU CONTROLLER
-      */
-      int block_index = get_block_by_index(&local_cache, local_address);
-      struct CacheBlock *block;
 
+      Cache local_cache = get_core_cache(core_id, bus);
+      int block_index = getCacheBlock_by_address(&local_cache, local_address);
+      CacheBlock block;
+
+      // if block is no in current core, then check the next one
       if (block_index == -1)
-      {
-        block = NULL;
-      } else {
-        block = &(local_cache->blocks[block_index]);
-      }
+        continue;
 
-     int state = block->state;
-     char address[4] = block->address;
-     if ((strcmp(local_address, address) == 0) &&
-      (state == EXCLUSIVE || state == SHARED))
-     {
-      /* cache read delay, add RD transaction to stats */
-      set_cache_block_state(core_id, &bus, SHARED);
-      return block->data;
-     }     
+      else
+        block = local_cache.blocks[block_index];
+
+      int state = block.state;
+      char *address = block.address;
+      if ((strcmp(local_address, address) == 0) &&
+        (state == MODIFIED || state == OWNED))
+      {
+        /* cache read delay, add RD transaction to stats */
+        set_core_cache_block_state(core_id, block_index, bus, OWNED);
+        return block.data;
+      }     
 
     }
   }
+
+  return -1;
+
+}
+
+int seek_shared(char * local_address, int requester_id, struct bus *bus){
+  
+  for (int core_id = 0; core_id < N_CPU; core_id++){
+    if (core_id != requester_id){
+
+      Cache local_cache = get_core_cache(core_id, bus);
+      int block_index = getCacheBlock_by_address(&local_cache, local_address);
+      CacheBlock block;
+
+      // if block is no in current core, then check the next one
+      if (block_index == -1)
+        continue;
+
+      else
+        block = local_cache.blocks[block_index];
+
+      int state = block.state;
+      char *address = block.address;
+      if ((strcmp(local_address, address) == 0) &&
+        (state == EXCLUSIVE || state == SHARED))
+      {
+        /* cache read delay, add RD transaction to stats */
+        set_core_cache_block_state(core_id, block_index, bus, SHARED);
+        return block.data;
+      }     
+
+    }
+  }
+  return -1;
 }
 
 void seek_invalidate(char * local_address, int requester_id, struct bus * bus){
+
 //search for this block in each core and invalidate it
-//search for block that can gives the value - Owned or Modified
   for (int core_id = 0; core_id < N_CPU; core_id++){
     if (core_id != requester_id){
-      struct Cache *local_cache = get_core_cache(core_id, &bus);
-      /**
-       * IMPLEMENTAR EN CPU CONTROLLER
-      */
-      struct CacheBlock *block = get_block_by_index(&local_cache, local_address);
-      if (block == NULL)
-      {
-        continue;
-      }
-      if (&(block->state) == INVALID)
+      Cache local_cache = get_core_cache(core_id, bus);
+      int block_index = getCacheBlock_by_address(&local_cache, local_address);
+      CacheBlock block;
+      
+       // if block is no in current core, then check the next one
+      if (block_index == -1) continue;
+
+      else block = local_cache.blocks[block_index];
+
+      if (block.state == INVALID)
       {
         //add INV transaction to stats
         return;
@@ -80,7 +117,7 @@ void seek_invalidate(char * local_address, int requester_id, struct bus * bus){
       /**
        * IMPLEMENTAR EN CPU CONTROLLER
       */
-      set_cache_block_state(core_id, &bus, INVALID);
+      set_core_cache_block_state(core_id, block_index, bus, INVALID);
       //cache wr delay
       //animation highlight invalid
 

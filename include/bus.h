@@ -21,6 +21,8 @@ else revisar si el address en otra cache tienen estado EXCLUSIVE o SHARED
 
 Cache get_core_cache(int cpu_id, struct bus *bus);
 
+void set_core_cache_block_state(int core_id,  int block_index, struct bus *bus, int state);
+
 void process_readmiss();
 
     /*

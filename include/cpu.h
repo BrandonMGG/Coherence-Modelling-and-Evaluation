@@ -1,31 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 // Estados de los bloques de caché
 #define CACHE_SIZE 4
 
-// Estados de los bloques de caché
-typedef enum {
-    INVALID,
-    EXCLUSIVE,
-    SHARED,
-    MODIFIED,
-    OWNED,
-    UNKNOWN
-} CacheState;
-
-// Bloque de caché
-typedef struct {
-    CacheState state;
-    char address[CACHE_SIZE];
-    int tag;
-    int data;
-} CacheBlock;
-
-// Caché
-typedef struct {
-    CacheBlock blocks[CACHE_SIZE];
-} Cache;
-
+// Definir una estructura para representar una CPU
 struct CPU {
-    int id; 
-    Cache cache;
+    int id; // Identificador de la CPU (por ejemplo, 'A', 'B', 'C', ...)
+    Cache cache;//estructura de cache
 };
 
+
+// Función para ejecutar una instrucción en la CPU
+void execute_instruction(struct CPU *cpu, struct Instruction *instr);
