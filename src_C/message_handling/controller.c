@@ -16,7 +16,7 @@ int main() {
 
     // Generate and send messages (for demonstration, repeat 5 times)
     for (int i = 0; i < 5; i++) {
-        snprintf(message.id, sizeof(message.id), "CPU-%d", i);
+        message.id = i;
         message.access = rand() % 2; // Random access type (0 or 1)
         snprintf(message.address, sizeof(message.address), "0x%x", rand());
         message.block_id = rand() % 16; // Random block ID

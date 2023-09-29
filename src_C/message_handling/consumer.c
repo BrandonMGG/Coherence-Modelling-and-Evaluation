@@ -19,7 +19,7 @@ int main() {
         }
 
         // Process the received message (e.g., trigger cache coherence actions)
-        printf("Received message: id=%s, access=%d, address=%s, block_id=%d\n",
+        printf("Received message: id=%d, access=%d, address=%s, block_id=%d\n",
                message.id, message.access, message.address, message.block_id);
     }
 

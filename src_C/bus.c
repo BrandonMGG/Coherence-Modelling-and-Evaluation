@@ -17,12 +17,44 @@ void set_core_cache_block_state(int cpu_id, int block_index, struct bus *bus, in
   bus->cpus[cpu_id].cache.blocks[block_index].state = state;
 }
 
-void process_readmiss(){
+void process_readmiss(int cpu_id, int block_index, struct bus *bus){
+  //If I do read and if I am writing on M or O I must do WB
+  if(bus->cpus[cpu_id].cache.blocks[block_index].state == MODIFIED || bus->cpus[cpu_id].cache.blocks[block_index].state == OWNED){
+    perform_wb(bus->cpus[cpu_id].cache.blocks[block_index].address,bus->cpus[cpu_id].cache.blocks[block_index].data, bus);
+  }
+  //# Now ask check if other cores has the block
+  int owned_data = seek_owned(bus->cpus[cpu_id].cache.blocks[block_index].address,cpu_id,bus);
+  
+  //# If sponsors state is O or M then set block state to S
+  if(owned_data != -1){
+    bus->cpus[cpu_id].cache.blocks[block_index].state = SHARED;
+    bus->cpus[cpu_id].cache.blocks[block_index].data = owned_data; 
+  //If no sponsors
+  }else {
+    // Check if address is E or S in another node
+    //and save that value to the local cache in S state
+    int shared_data = seek_shared(bus->cpus[cpu_id].cache.blocks[block_index].address,cpu_id,bus);
+    if(shared_data != -1){
+      bus->cpus[cpu_id].cache.blocks[block_index].state = SHARED;
+      bus->cpus[cpu_id].cache.blocks[block_index].data = shared_data;
 
+    }else{
+      //Then no one have the value, read from memory then set block state to E
+      int mem_data = get_data_from_memory(&bus->main_memory,bus->cpus[cpu_id].cache.blocks[block_index].address);
+      bus->cpus[cpu_id].cache.blocks[block_index].state = EXCLUSIVE;
+      bus->cpus[cpu_id].cache.blocks[block_index].data = mem_data;
+    }
+  }
 }
 
-void process_writemiss(){
-
+void process_writemiss(int cpu_id, int block_index, struct bus *bus, int value){
+  //If I do read and if I am writing on M or O I must do WB
+  if(bus->cpus[cpu_id].cache.blocks[block_index].state == MODIFIED || bus->cpus[cpu_id].cache.blocks[block_index].state == OWNED){
+    perform_wb(bus->cpus[cpu_id].cache.blocks[block_index].address,bus->cpus[cpu_id].cache.blocks[block_index].data, bus);
+  }
+  bus->cpus[cpu_id].cache.blocks[block_index].state = MODIFIED;
+  bus->cpus[cpu_id].cache.blocks[block_index].data = value;
+  seek_invalidate(bus->cpus[cpu_id].cache.blocks[block_index].address,cpu_id,bus);
 }
 
 void perform_wb(char * dirty_address, int dirty_data, struct bus *bus){
