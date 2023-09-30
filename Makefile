@@ -10,7 +10,7 @@ bus: src_C/memory.c src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c s
 
 
 cpu: src_C/cache_moesi.c src_C/cpu.c $(inc_cache) $(inc_rand) $(inc_cpu)
-	$(CC) $(CFLAGS) -o bin/cpu src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c -lrt -lpthread
+	$(CC) $(CFLAGS) -o bin/cpu src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c  -lrt -lpthread
 
 run_bus:
 	bin/bus

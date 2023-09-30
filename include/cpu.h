@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mqueue.h>
+
 // Estados de los bloques de caché
 #define CACHE_SIZE 4
 
@@ -12,4 +14,4 @@ struct CPU {
 
 
 // Función para ejecutar una instrucción en la CPU
-void execute_instruction(struct CPU *cpu, struct Instruction *instr);
+void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t *mq);

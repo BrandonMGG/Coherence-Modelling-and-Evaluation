@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "cpu.c"
+#include "../include/bus.h"
+#include "../include/cpu.h"
 
 struct Channel {
     char op[10];
