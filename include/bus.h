@@ -8,6 +8,12 @@ struct bus {
   struct CPU cpus[N_CPU];
 };
 
+typedef enum {
+    READMISS,
+    WRITEMISS
+} AccessType;
+
+struct Message message;
 /*
 if (cpu->state == MODIFIED || cpu->state == OWNED ){
     //WRITE MEMORIA preform_wb wb bus.py
@@ -23,7 +29,9 @@ Cache get_core_cache(int cpu_id, struct bus *bus);
 
 void set_core_cache_block_state(int core_id,  int block_index, struct bus *bus, int state);
 
-void process_readmiss();
+void process_tasks(struct bus *bus, mqd_t mq);
+
+void process_readmiss(int cpu_id, int block_index, struct bus *bus);
 
     /*
     if state == MODIFIED || state == OWNED write en memoria perform_wb en bus.py
@@ -31,7 +39,7 @@ void process_readmiss();
     Invalidad address a todas las caches
     
     */
-void process_writemiss();
+void process_writemiss(int cpu_id, int block_index, struct bus *bus, int state);
 
 void perform_wb(char * dirty_address, int dirty_data, struct bus *bus);
 

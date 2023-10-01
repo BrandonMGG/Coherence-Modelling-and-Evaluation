@@ -13,6 +13,43 @@ Cache get_core_cache(int cpu_id, struct bus *bus){
   return bus->cpus[cpu_id].cache;
 }
 
+void process_tasks(struct bus *bus, mqd_t mq){
+  // SIMULATE PROCESS DELAY
+  message = bus->channel;
+  int access, core_id, block_id, data;
+  CacheBlock block;
+  Cache local_cache;
+
+  while (mq_receive(mq, (char *)&message, sizeof(struct Message), NULL) == -1)
+  {
+    access = message.access;
+
+    // Get core cache
+    core_id = message.id;
+    local_cache = get_core_cache(core_id, bus);
+
+    // Get info from cache
+
+    block_id = message.block_id;
+    block = local_cache.blocks[block_id];
+    //state = block.state;
+    data = block.data;
+
+    if (access == WRITEMISS)
+    {
+      process_writemiss(core_id, block_id, bus, data);
+    }
+    else if (access == READMISS)
+    {
+      process_readmiss(core_id, block_id, bus);
+    }
+    
+    else printf("Access Error - %d not found", access);
+
+  }
+  
+}
+
 void set_core_cache_block_state(int cpu_id, int block_index, struct bus *bus, int state){
   bus->cpus[cpu_id].cache.blocks[block_index].state = state;
 }
@@ -22,10 +59,10 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus){
   if(bus->cpus[cpu_id].cache.blocks[block_index].state == MODIFIED || bus->cpus[cpu_id].cache.blocks[block_index].state == OWNED){
     perform_wb(bus->cpus[cpu_id].cache.blocks[block_index].address,bus->cpus[cpu_id].cache.blocks[block_index].data, bus);
   }
-  //# Now ask check if other cores has the block
+  // Now ask check if other cores has the block
   int owned_data = seek_owned(bus->cpus[cpu_id].cache.blocks[block_index].address,cpu_id,bus);
   
-  //# If sponsors state is O or M then set block state to S
+  // If sponsors state is O or M then set block state to S
   if(owned_data != -1){
     bus->cpus[cpu_id].cache.blocks[block_index].state = SHARED;
     bus->cpus[cpu_id].cache.blocks[block_index].data = owned_data; 
