@@ -29,7 +29,7 @@ Cache get_core_cache(int cpu_id, struct bus *bus);
 
 void set_core_cache_block_state(int core_id,  int block_index, struct bus *bus, int state);
 
-void process_tasks(struct bus *bus, mqd_t mq);
+void process_tasks(struct bus *bus, mqd_t mq, int busIsActive);
 
 void process_readmiss(int cpu_id, int block_index, struct bus *bus);
 

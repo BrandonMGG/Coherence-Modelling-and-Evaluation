@@ -18,7 +18,7 @@ void initializeCache(Cache* cache) {
 }
 
 // Escribe un bloque en la caché
-void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t *mq) {
+void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
     //mqd_t mq;
     //mq = create_message_queue();
     //srand(time(NULL));
@@ -94,7 +94,7 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t *
 }
 
 // Lee un bloque de la caché
-int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t *mq) {
+int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
     int index = 0;
     char message2[20] = " ";
     struct Message message;
@@ -143,7 +143,7 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t *mq) {
             message.id = id;
             message.access = 1;
             snprintf(message.address, sizeof(message.address), "%s", address);
-            message.block_id = getBlockIdWithWriteBackPolicy(&cache);
+            message.block_id = getBlockIdWithWriteBackPolicy(cache);
             // Send the message to the queue
             send_message(mq, &message);
             // Sleep briefly to simulate processing time

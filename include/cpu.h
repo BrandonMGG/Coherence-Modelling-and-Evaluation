@@ -14,4 +14,4 @@ struct CPU {
 
 
 // Función para ejecutar una instrucción en la CPU
-void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t *mq);
+void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t mq);

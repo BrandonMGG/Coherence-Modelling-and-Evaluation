@@ -37,7 +37,7 @@ int test() {
 
   memory_init(&main_memory);
   for (int i = 0; i < MEM_SIZE; i++) {
-    printf("Address: %s, Data: %d \n", main_memory.entries[i].address, main_memory.entries[i].data);
+    printf("Address: 0x%s, Data: %d \n", main_memory.entries[i].address, main_memory.entries[i].data);
   }
   
   // Memory ops testing

@@ -13,15 +13,25 @@ Cache get_core_cache(int cpu_id, struct bus *bus){
   return bus->cpus[cpu_id].cache;
 }
 
-void process_tasks(struct bus *bus, mqd_t mq){
+void process_tasks(struct bus *bus, mqd_t mq, int busIsActive){
   // SIMULATE PROCESS DELAY
   message = bus->channel;
   int access, core_id, block_id, data;
   CacheBlock block;
   Cache local_cache;
 
-  while (mq_receive(mq, (char *)&message, sizeof(struct Message), NULL) == -1)
+  while (busIsActive == 1)
   {
+
+    if (mq_receive(mq, (char *)&message, sizeof(struct Message), NULL) == -1) {
+            perror("mq_receive");
+            break;
+        }
+    
+    // Process the received message (e.g., trigger cache coherence actions)
+    printf("Received message: id=%d, access=%d, address=%s, block_id=%d\n",
+        message.id, message.access, message.address, message.block_id);
+
     access = message.access;
 
     // Get core cache
@@ -85,6 +95,7 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus){
 }
 
 void process_writemiss(int cpu_id, int block_index, struct bus *bus, int value){
+
   //If I do read and if I am writing on M or O I must do WB
   if(bus->cpus[cpu_id].cache.blocks[block_index].state == MODIFIED || bus->cpus[cpu_id].cache.blocks[block_index].state == OWNED){
     perform_wb(bus->cpus[cpu_id].cache.blocks[block_index].address,bus->cpus[cpu_id].cache.blocks[block_index].data, bus);
@@ -210,6 +221,23 @@ int main() {
 
   int data = get_data_from_memory(&(my_bus.main_memory), "F");
   printf("Data at address 0xf: %d\n", data);
+
+
+  // Bus queue test
+  mqd_t mq;
+  struct Message message;
+
+  // Open the message queue
+  mq = mq_open(MQ_NAME, O_RDONLY);
+  if (mq == (mqd_t)-1) {
+      perror("mq_open");
+      exit(1);
+  }
+
+  process_tasks(&my_bus, mq, 1);
+
+  // Close the message queue
+  mq_close(mq);
 
   return 0;
 }
