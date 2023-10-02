@@ -198,7 +198,7 @@ int getCacheBlock_by_address(Cache* cache, char address[SIZE]) {
     int index = 0;
     for(int i = 0; i<CACHE_SIZE; i++){
         //Ver si existe la direccion de memoria en cache
-        if(cache->blocks[i].address == address){
+        if(strcmp(cache->blocks[i].address, address) == 0){
             index = cache->blocks[i].tag;
             return index;
         }        
