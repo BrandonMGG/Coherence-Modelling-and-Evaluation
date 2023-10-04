@@ -206,38 +206,37 @@ void seek_invalidate(char * local_address, int requester_id, struct bus * bus){
 }
 
 
-int main() {
-  //main memory test
-  //test();
+// int main() {
+//   //main memory test
+//   //test();
 
-  struct memory main_memory;
-  struct bus my_bus;
+//   struct memory main_memory;
+//   struct bus my_bus;
 
-  //Bus ops testing
-  memory_init(&main_memory);
-  my_bus.main_memory = main_memory; 
+//   //Bus ops testing
+//   memory_init(&main_memory);
+//   my_bus.main_memory = main_memory; 
 
-  perform_wb("F", 65, &my_bus);
+//   perform_wb("F", 65, &my_bus);
 
-  int data = get_data_from_memory(&(my_bus.main_memory), "F");
-  printf("Data at address 0xf: %d\n", data);
+//   int data = get_data_from_memory(&(my_bus.main_memory), "F");
+//   printf("Data at address 0xf: %d\n", data);
 
 
-  // Bus queue test
-  mqd_t mq;
-  struct Message message;
+//   // Bus queue test
+//   mqd_t mq;
 
-  // Open the message queue
-  mq = mq_open(MQ_NAME, O_RDONLY);
-  if (mq == (mqd_t)-1) {
-      perror("mq_open");
-      exit(1);
-  }
+//   // Open the message queue
+//   mq = mq_open(MQ_NAME, O_RDONLY);
+//   if (mq == (mqd_t)-1) {
+//       perror("mq_open");
+//       exit(1);
+//   }
 
-  process_tasks(&my_bus, mq, 1);
+//   process_tasks(&my_bus, mq, 1);
 
-  // Close the message queue
-  mq_close(mq);
+//   // Close the message queue
+//   mq_close(mq);
 
-  return 0;
-}
+//   return 0;
+// }

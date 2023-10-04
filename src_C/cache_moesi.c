@@ -6,7 +6,7 @@
 //#include "../include/messages.h"
 #include "../include/cache.h"
 #include <mqueue.h>
-#include "../src_C/message_handling/messages.c"
+#include "../include/messages.h"
 
 // Inicializa la caché
 void initializeCache(Cache* cache) {

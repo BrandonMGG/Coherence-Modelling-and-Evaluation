@@ -1,5 +1,5 @@
 
-#include "../../include/messages.h"
+#include "../include/messages.h"
 
 // Create and open the message queue
 mqd_t create_message_queue() {
