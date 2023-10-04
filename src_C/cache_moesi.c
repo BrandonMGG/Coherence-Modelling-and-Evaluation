@@ -14,6 +14,7 @@ void initializeCache(Cache* cache) {
         cache->blocks[i].state = INVALID;
         cache->blocks[i].tag = i;
         cache->blocks[i].data = 0;
+        snprintf(cache->blocks[i].address, sizeof(cache->blocks[i].address), "-1");
     }
 }
 
@@ -43,17 +44,18 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t m
 
                 //envio del mensaje
                 message.id = id;
-                message.access = 0;
+                message.access = 1;
                 snprintf(message.address, sizeof(message.address), "%s", address);
                 message.value = data;
                 message.block_id = index;
+                printf("Write esta en Modified o Exclusive\n");
                 // Send the message to the queue
                 send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(2); // Sleep for 2 s
+                sleep(1); // Sleep for 2 s
 
                 strcpy((char*)message1, "Write Cache Miss");
-                printf("Write esta en Modified o Exclusive\n");
+                
                 
             }else{
                 cache->blocks[index].state = MODIFIED;
@@ -74,16 +76,17 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t m
                 }*/
             //envio del mensaje
             message.id = id;
-            message.access = 0;
+            message.access = 1;
             snprintf(message.address, sizeof(message.address), "%s", address);
             message.block_id = getBlockIdWithWriteBackPolicy(cache);
             message.value = data;
+            printf("Write no esta en cache\n");
             // Send the message to the queue
             send_message(mq, &message);
             // Sleep briefly to simulate processing time
-            sleep(2); // Sleep for 2 s
+            sleep(1); // Sleep for 2 s
 
-            printf("Write no esta en cache\n");
+            
             
             strcpy((char*)message1, "Write Cache Miss");
             break;
@@ -98,7 +101,7 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
     int index = 0;
     char message2[20] = " ";
     struct Message message;
-    printf("Address: %s, Cache: %s\n", address, cache->blocks[0].address);
+    //printf("Address: %s, Cache: %s\n", address, cache->blocks[0].address);
     for(int i=0; i<CACHE_SIZE; i++){
         //Ver si existe la direccion de memoria en cache
         if( strcmp(cache->blocks[i].address, address) == 0){  
@@ -119,15 +122,16 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
                     }*/
                 //envio del mensaje
                 message.id = id;
-                message.access = 1;
+                message.access = 0;
                 snprintf(message.address, sizeof(message.address), "%s", address);
                 message.block_id = cache->blocks[index].tag;
+                printf("Read esta en cache pero en Invalid\n");
                 // Send the message to the queue
                 send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(2); // Sleep for 2 s
+                sleep(1); // Sleep for 2 s
                 strcpy((char*)message2, "Read Cache Miss");
-                printf("Read esta en cache pero en Invalid\n");
+                
                 break;
             }
         }else{
@@ -141,16 +145,17 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
                 }*/
             //envio del mensaje
             message.id = id;
-            message.access = 1;
+            message.access = 0;
             snprintf(message.address, sizeof(message.address), "%s", address);
             message.block_id = getBlockIdWithWriteBackPolicy(cache);
+            printf("Read no esta en cache\n");
             // Send the message to the queue
             send_message(mq, &message);
             // Sleep briefly to simulate processing time
-            sleep(2); // Sleep for 2 s
+            sleep(1); // Sleep for 2 s
 
             strcpy((char*)message2, "Read Cache Miss");
-            printf("Read no esta en cache\n");
+            
             break;
         }
         
@@ -198,7 +203,7 @@ int getCacheBlock_by_address(Cache* cache, char address[SIZE]) {
     int index = 0;
     for(int i = 0; i<CACHE_SIZE; i++){
         //Ver si existe la direccion de memoria en cache
-        if(cache->blocks[i].address == address){
+        if(strcmp(cache->blocks[i].address, address) == 0){
             index = cache->blocks[i].tag;
             return index;
         }        

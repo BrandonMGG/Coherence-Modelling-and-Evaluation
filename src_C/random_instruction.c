@@ -67,7 +67,7 @@ void get_random_instruction(struct Instruction *instr) {
         sprintf(instr->address, "0x%X", random_Hex());
         instr->data = get_random_data();
     } else {
-        sprintf(instr->op, "INCR");
+        sprintf(instr->op, "READ");
         sprintf(instr->address, "0x%X", random_Hex());
         instr->data= 0;
     }

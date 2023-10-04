@@ -8,7 +8,7 @@
 struct Message {
     int id;
     int access;
-    char address[128];
+    char address[4];
     int value;
     int block_id;
 };

@@ -13,13 +13,13 @@
 
 struct cpu_thread_args
 {
-   struct CPU cpu; 
+   struct CPU *cpu; 
    mqd_t mq;
 };
 
 struct bus_thread_args
 {
-   struct bus bus; 
+   struct bus *bus; 
    int isBusActive;
    mqd_t mq;
 };
@@ -27,24 +27,29 @@ struct bus_thread_args
 void* cpu_thread (void *args){
     struct cpu_thread_args* t_args = (struct cpu_thread_args*)args; 
     struct Instruction new_instruction;
-    struct CPU cpu = t_args->cpu;
+    struct CPU *cpu = t_args->cpu;
     mqd_t mq = t_args->mq;
-
+    
+    for(int i=0 ; i < 4 ; i++){
     get_random_instruction(&new_instruction);
 
-   printf("Executing instruction %s from core %d \n", new_instruction.op, cpu.id);
+    printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
 
-    execute_instruction(&cpu, &new_instruction, mq);
+    execute_instruction(cpu, &new_instruction, mq);
+    }
     return NULL;
 }
 
 void* bus_thread (void *args){
     struct bus_thread_args* t_args = (struct bus_thread_args*) args;
-    struct bus bus = t_args->bus;
+    struct bus *bus = t_args->bus;
     mqd_t mq = t_args->mq;
     int isBusActive = t_args->isBusActive;
 
-    process_tasks(&bus, mq, isBusActive);
+    for(int i =0; i < CACHE_SIZE ; i++){
+            printf("77777777---Cache x Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[0].cache.blocks[i].tag ,bus->cpus[0].cache.blocks[i].address ,bus->cpus[0].cache.blocks[i].state ,bus->cpus[0].cache.blocks[i].data);
+    }
+    process_tasks(bus, mq, isBusActive);
 
     return NULL;
 }
@@ -62,22 +67,37 @@ int main(){
     my_bus.main_memory = main_memory; 
 
     
-    struct cpu_thread_args cpu_t_args;
     struct bus_thread_args bus_t_args;
 
     mq = create_message_queue();
-    cpu_t_args.mq = mq;
-    bus_t_args.bus = my_bus;
+    bus_t_args.bus = &my_bus;
     bus_t_args.isBusActive = 1;
     bus_t_args.mq = mq;
 
-    //Init and start CPU and bus threads
+    struct cpu_thread_args cpu_thread_args_array[N_CPU];
+
+    // Inicializar y lanzar las threads de CPU
     for (int i = 0; i < N_CPU; i++)
-    {   
+    {
         my_bus.cpus[i].id = i;
         initializeCache(&my_bus.cpus[i].cache);
-        cpu_t_args.cpu = my_bus.cpus[i];
-        pthread_create(&cpu_threads[i], NULL, cpu_thread, (void*)&cpu_t_args);
+
+        
+
+        cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
+        cpu_thread_args_array[i].mq = mq;
+        
+        /*
+        for(int j =0; j < CACHE_SIZE ; j++){
+            printf("-----------Cache x Tag -> %d Address -> %s State -> %d Value -> %d \n",my_bus.cpus[i].cache.blocks[j].tag ,my_bus.cpus[i].cache.blocks[j].address 
+            ,my_bus.cpus[i].cache.blocks[j].state ,my_bus.cpus[i].cache.blocks[j].data);
+        }
+        for(int k =0; k < CACHE_SIZE ; k++){
+            printf("888888888---Cache x Tag -> %d Address -> %s State -> %d Value -> %d \n",cpu_thread_args_array[i].cpu->cache.blocks[k].tag ,
+            cpu_thread_args_array[i].cpu->cache.blocks[k].address ,cpu_thread_args_array[i].cpu->cache.blocks[k].state ,cpu_thread_args_array[i].cpu->cache.blocks[k].data);
+        }
+        */
+        pthread_create(&cpu_threads[i], NULL, cpu_thread, (void*)&cpu_thread_args_array[i]);
     }
     
     pthread_create(&bus_t, NULL, bus_thread, (void *) & bus_t_args);
@@ -89,9 +109,11 @@ int main(){
     }
 
     pthread_join(bus_t, NULL);
-
+    
 
     cleanup_message_queue(mq);
+    
+    
 
     return 0;
     

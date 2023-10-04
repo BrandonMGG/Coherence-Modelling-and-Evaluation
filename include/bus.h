@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define N_CPU 4
+#define N_CPU 2
 
 struct bus {
   struct memory main_memory;
