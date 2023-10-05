@@ -31,11 +31,11 @@ void* cpu_thread (void *args){
     mqd_t mq = t_args->mq;
     
     for(int i=0 ; i < 4 ; i++){
-    get_random_instruction(&new_instruction);
+        get_random_instruction(&new_instruction);
 
-    printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
+        printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
 
-    execute_instruction(cpu, &new_instruction, mq);
+        execute_instruction(cpu, &new_instruction, mq);
     }
     return NULL;
 }

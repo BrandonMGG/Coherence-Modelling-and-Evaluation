@@ -84,6 +84,7 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus){
     //printf("cpu : %d , block index: %d ,state : %d \n", cpu_id, block_index , bus->cpus[cpu_id].cache.blocks[block_index].state);
     printf("Readmiss Modified o Owned  Address: %s \n", bus->channel.address);
   }
+  
   // Now ask check if other cores has the block
   int owned_data = seek_owned(bus->channel.address,cpu_id,bus);
   
