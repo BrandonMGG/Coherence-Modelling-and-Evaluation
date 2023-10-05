@@ -19,7 +19,7 @@ void initializeCache(Cache* cache) {
 }
 
 // Escribe un bloque en la caché
-void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
+int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
     //mqd_t mq;
     //mq = create_message_queue();
     //srand(time(NULL));
@@ -54,17 +54,19 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t m
                 // Sleep briefly to simulate processing time
                 sleep(4); // Sleep for 2 s
 
-                strcpy((char*)message1, "Write Cache Miss");
+                return -1;
                 
                 
             }else{
                 cache->blocks[index].state = MODIFIED;
                 cache->blocks[index].data = data;
+                
                 //strcpy((char*)message, "Write Cache Hit");
                 printf("Write si estaba en cache y se modifico\n");
+                return 1;
                 
             }
-            break;
+            //break;
         }else{
             //no existe en cache
             /*enviar mensaje de message = {
@@ -89,11 +91,12 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t m
             
             
             strcpy((char*)message1, "Write Cache Miss");
-            break;
+            //break;
+            return -1;
         }
         
     }
-    
+    return -1;
 }
 
 // Lee un bloque de la caché

@@ -13,6 +13,12 @@ typedef enum {
     WRITEMISS
 } AccessType;
 
+
+typedef enum {
+    MOESI,
+    MESI
+} Protocol;
+
 struct Message message;
 /*
 if (cpu->state == MODIFIED || cpu->state == OWNED ){
@@ -29,9 +35,9 @@ Cache get_core_cache(int cpu_id, struct bus *bus);
 
 void set_core_cache_block_state(int core_id,  int block_index, struct bus *bus, int state);
 
-void process_tasks(struct bus *bus, mqd_t mq, int busIsActive);
+void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot);
 
-void process_readmiss(int cpu_id, int block_index, struct bus *bus);
+void process_readmiss(int cpu_id, int block_index, struct bus *bus, int prot);
 
     /*
     if state == MODIFIED || state == OWNED write en memoria perform_wb en bus.py

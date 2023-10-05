@@ -29,7 +29,7 @@ typedef struct {
 // Inicializa la caché
 void initializeCache(Cache* cache);
 // Escribe un bloque en la caché
-void writeCacheBlock(Cache* cache, char address[CACHE_SIZE], int data ,int id, mqd_t mq);
+int writeCacheBlock(Cache* cache, char address[CACHE_SIZE], int data ,int id, mqd_t mq);
 
 // Lee un bloque de la caché
 int readCacheBlock(Cache* cache, char address[CACHE_SIZE], int id, mqd_t mq);

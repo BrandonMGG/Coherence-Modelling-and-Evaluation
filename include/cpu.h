@@ -6,10 +6,17 @@
 // Estados de los bloques de caché
 #define CACHE_SIZE 4
 
+struct Stats{
+    int INV;
+    int READ_REQ_RESP;
+    int WRITE_REQ_RESP;
+};
+
 // Definir una estructura para representar una CPU
 struct CPU {
     int id; // Identificador de la CPU (por ejemplo, 'A', 'B', 'C', ...)
     Cache cache;//estructura de cache
+    struct Stats stats;
 };
 
 

@@ -21,6 +21,7 @@ struct bus_thread_args
 {
    struct bus *bus; 
    int isBusActive;
+   int protocolo;
    mqd_t mq;
 };
 
@@ -30,12 +31,14 @@ void* cpu_thread (void *args){
     struct CPU *cpu = t_args->cpu;
     mqd_t mq = t_args->mq;
     
-    for(int i=0 ; i < 4 ; i++){
+    for(int i=0 ; i < 10 ; i++){
         get_random_instruction(&new_instruction);
-
+        
         printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
 
         execute_instruction(cpu, &new_instruction, mq);
+
+        printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n",cpu->id ,cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     }
     return NULL;
 }
@@ -45,11 +48,12 @@ void* bus_thread (void *args){
     struct bus *bus = t_args->bus;
     mqd_t mq = t_args->mq;
     int isBusActive = t_args->isBusActive;
-
+    int proto = t_args->protocolo;
     for(int i =0; i < CACHE_SIZE ; i++){
             printf("77777777---Cache x Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[0].cache.blocks[i].tag ,bus->cpus[0].cache.blocks[i].address ,bus->cpus[0].cache.blocks[i].state ,bus->cpus[0].cache.blocks[i].data);
     }
-    process_tasks(bus, mq, isBusActive);
+    
+    process_tasks(bus, mq, isBusActive, proto);
 
     return NULL;
 }
@@ -72,6 +76,7 @@ int main(){
     mq = create_message_queue();
     bus_t_args.bus = &my_bus;
     bus_t_args.isBusActive = 1;
+    bus_t_args.protocolo = MESI;
     bus_t_args.mq = mq;
 
     struct cpu_thread_args cpu_thread_args_array[N_CPU];
@@ -82,6 +87,9 @@ int main(){
         my_bus.cpus[i].id = i;
         initializeCache(&my_bus.cpus[i].cache);
 
+        my_bus.cpus[i].stats.INV= 0;
+        my_bus.cpus[i].stats.READ_REQ_RESP =0;
+        my_bus.cpus[i].stats.WRITE_REQ_RESP= 0;
         
 
         cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
