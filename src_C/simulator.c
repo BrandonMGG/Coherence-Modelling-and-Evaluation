@@ -70,7 +70,8 @@ int main(){
     struct bus_thread_args bus_t_args;
 
     mq = create_message_queue();
-    bus_t_args.bus = &my_bus;
+    bus_t_args.bus = &my_bus; //Estructura bus
+ //   bus_t_args.bus->channel.access
     bus_t_args.isBusActive = 1;
     bus_t_args.mq = mq;
 
