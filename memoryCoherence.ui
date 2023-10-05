@@ -9,7 +9,7 @@
       <placeholder/>
     </child>
     <child>
-      <object class="GtkGrid">
+      <object class="GtkGrid" id="mainGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
@@ -20,7 +20,7 @@
             <property name="vexpand">False</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkGrid">
+              <object class="GtkGrid" id="cpu2Grid0">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
@@ -91,7 +91,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkGrid">
+              <object class="GtkGrid" id="cpu2Grid1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="vexpand">True</property>

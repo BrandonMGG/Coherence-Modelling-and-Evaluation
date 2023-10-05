@@ -1,3 +1,10 @@
-#addressPE2 {
-    color:red;
+.label0 {
+    color: red;
+    font-weight: bold;
+    background-color: black;
+}
+.label1{
+    color: white;
+    font-weight: bold;
+    background-color: black;
 }

@@ -10,11 +10,11 @@
       <placeholder/>
     </child>
     <child>
-      <object class="GtkGrid">
+      <object class="GtkGrid" id="mainGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="cpu2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
