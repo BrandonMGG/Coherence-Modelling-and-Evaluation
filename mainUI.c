@@ -16,9 +16,9 @@
 #include <string.h>
 #include <mqueue.h>
 
-
+int startProgramCondition;
 GtkBuilder *builder;
-GtkWidget *window, *grid,*start,
+GtkWidget *window, *grid, *start,
     *mainGrid,
     *cpu2,
     *cpu2Grid0,
@@ -118,45 +118,45 @@ GtkWidget *window, *grid,*start,
     *a1,
     *a2,
     *a3,
-*a3state,
-*a1state,
-*a0state,
-*a2Address,
-*a0Address,
-*a1Data,
-*a0Data,
-*a1Address,
-*a2state,
-*a3Data,
-*a2Data,
-*a3Address,
-*statePE1,
-*addressMemoryLabel,
-*data0,
-*dataMemoryLabel,
-*address0,
-*address1,
-*data2,
-*address2,
-*data1,
-*data3,
-*data5,
-*address3,
-*data4,
-*data6,
-*data7,
-*address6,
-*address5,
-*address4,
-*address7,
-*data8,
-*data9,
-*data10,
-*data11,
-*data12,
-*data13,
-*data14,
-*data15;
+    *a3state,
+    *a1state,
+    *a0state,
+    *a2Address,
+    *a0Address,
+    *a1Data,
+    *a0Data,
+    *a1Address,
+    *a2state,
+    *a3Data,
+    *a2Data,
+    *a3Address,
+    *statePE1,
+    *addressMemoryLabel,
+    *data0,
+    *dataMemoryLabel,
+    *address0,
+    *address1,
+    *data2,
+    *address2,
+    *data1,
+    *data3,
+    *data5,
+    *address3,
+    *data4,
+    *data6,
+    *data7,
+    *address6,
+    *address5,
+    *address4,
+    *address7,
+    *data8,
+    *data9,
+    *data10,
+    *data11,
+    *data12,
+    *data13,
+    *data14,
+    *data15;
 
 GtkWidget *label0, *label1;
 GtkWidget *event_box;
@@ -165,16 +165,16 @@ int counter = 100;
 
 struct cpu_thread_args
 {
-   struct CPU *cpu; 
-   mqd_t mq;
+    struct CPU *cpu;
+    mqd_t mq;
 };
 
 struct bus_thread_args
 {
-   struct bus *bus; 
-   int isBusActive;
-   int protocolo;
-   mqd_t mq;
+    struct bus *bus;
+    int isBusActive;
+    int protocolo;
+    mqd_t mq;
 };
 
 typedef struct
@@ -191,14 +191,15 @@ typedef struct
     const char *color;
 } LabelDataInt;
 
-
-void* cpu_thread (void *args){
-    struct cpu_thread_args* t_args = (struct cpu_thread_args*)args; 
+void *cpu_thread(void *args)
+{
+    struct cpu_thread_args *t_args = (struct cpu_thread_args *)args;
     struct Instruction new_instruction;
     struct CPU *cpu = t_args->cpu;
     mqd_t mq = t_args->mq;
-    
-    for(int i=0 ; i < 10 ; i++){
+
+    for (int i = 0; i < 10; i++)
+    {
         get_random_instruction(&new_instruction);
 
         cpu->instruction = new_instruction;
@@ -207,27 +208,27 @@ void* cpu_thread (void *args){
 
         execute_instruction(cpu, &new_instruction, mq);
 
-        printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n",cpu->id ,cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
+        printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     }
     return NULL;
 }
 
-void* bus_thread (void *args){
-    struct bus_thread_args* t_args = (struct bus_thread_args*) args;
+void *bus_thread(void *args)
+{
+    struct bus_thread_args *t_args = (struct bus_thread_args *)args;
     struct bus *bus = t_args->bus;
     mqd_t mq = t_args->mq;
     int isBusActive = t_args->isBusActive;
     int proto = t_args->protocolo;
-    for(int i =0; i < CACHE_SIZE ; i++){
-            printf("77777777---Cache x Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[0].cache.blocks[i].tag ,bus->cpus[0].cache.blocks[i].address ,bus->cpus[0].cache.blocks[i].state ,bus->cpus[0].cache.blocks[i].data);
+    for (int i = 0; i < CACHE_SIZE; i++)
+    {
+        printf("77777777---Cache x Tag -> %d Address -> %s State -> %d Value -> %d \n", bus->cpus[0].cache.blocks[i].tag, bus->cpus[0].cache.blocks[i].address, bus->cpus[0].cache.blocks[i].state, bus->cpus[0].cache.blocks[i].data);
     }
-    
+
     process_tasks(bus, mq, isBusActive, proto);
 
     return NULL;
 }
-
-
 
 gboolean changeLabelColorWrapper(gpointer user_data)
 {
@@ -237,7 +238,7 @@ gboolean changeLabelColorWrapper(gpointer user_data)
 gboolean changeLabelColorWrapperInt(gpointer user_data)
 {
     LabelData *data = (LabelData *)user_data;
-    return changeLabelColorInt(data->label, (unsigned int) *(data->text), data->color);
+    return changeLabelColorInt(data->label, (unsigned int)*(data->text), data->color);
 }
 
 gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
@@ -256,32 +257,33 @@ gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
     return TRUE;
 }
 
-gboolean changeLabelColorInt(GtkWidget *label,unsigned int text, const char *color)
+gboolean changeLabelColorInt(GtkWidget *label, unsigned int text, const char *color)
 {
     gchar *display;
     display = g_strdup_printf("%d", text);
     static gboolean colorFlag = FALSE;
     counter = counter - 1;
     colorFlag = !colorFlag;
-    
 
-    //const char *backgroundColor = colorFlag ? color : color;
-    //const char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
-    //char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
-    //gtk_label_set_markup(GTK_LABEL(label), markup);
+    // const char *backgroundColor = colorFlag ? color : color;
+    // const char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
+    // char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
+    // gtk_label_set_markup(GTK_LABEL(label), markup);
     gtk_label_set_text(GTK_LABEL(label), display);
     g_free(display);
 
     return TRUE;
 }
 
-void button_clicked(GtkWidget *widget, gpointer data) {
+void button_clicked(GtkWidget *widget, gpointer data)
+{
+    startProgramCondition=1;
     g_print("Button clicked!\n");
 }
 
 int main(int argc, char *argv[])
 {
-    
+    startProgramCondition=0;
     gtk_init(&argc, &argv); ////NO PONER NADA FUERA DE ACA
 
     struct memory main_memory;
@@ -290,40 +292,41 @@ int main(int argc, char *argv[])
     pthread_t bus_t;
     mqd_t mq;
 
-    //Bus ops testing
+    // Bus ops testing
     memory_init(&main_memory);
-    my_bus.main_memory = main_memory; 
+    my_bus.main_memory = main_memory;
 
-    
     struct bus_thread_args bus_t_args;
 
     mq = create_message_queue();
-    bus_t_args.bus = &my_bus; //Estructura bus
- //   bus_t_args.bus->channel.access
+    bus_t_args.bus = &my_bus; // Estructura bus
+    //   bus_t_args.bus->channel.access
     bus_t_args.isBusActive = 1;
     bus_t_args.protocolo = MESI;
     bus_t_args.mq = mq;
 
     struct cpu_thread_args cpu_thread_args_array[N_CPU];
- // Inicializar y lanzar las threads de CPU
-    for (int i = 0; i < N_CPU; i++)
+    // Inicializar y lanzar las threads de CPU
+    if (startProgramCondition==0)
     {
-        my_bus.cpus[i].id = i;
-        initializeCache(&my_bus.cpus[i].cache);
+        for (int i = 0; i < N_CPU; i++)
+        {
+            my_bus.cpus[i].id = i;
+            initializeCache(&my_bus.cpus[i].cache);
 
-        my_bus.cpus[i].stats.INV = 0;
-        my_bus.cpus[i].stats.READ_REQ_RESP = 0;
-        my_bus.cpus[i].stats.WRITE_REQ_RESP = 0;
-        
+            my_bus.cpus[i].stats.INV = 0;
+            my_bus.cpus[i].stats.READ_REQ_RESP = 0;
+            my_bus.cpus[i].stats.WRITE_REQ_RESP = 0;
 
-        cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
-        cpu_thread_args_array[i].mq = mq;
-        pthread_create(&cpu_threads[i], NULL, cpu_thread, (void*)&cpu_thread_args_array[i]);
+            cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
+            cpu_thread_args_array[i].mq = mq;
+            pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
+        }
+        pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
     }
-    pthread_create(&bus_t, NULL, bus_thread, (void *) & bus_t_args);
 
-    //char *currentPE1 = my_bus.;
-    
+    // char *currentPE1 = my_bus.;
+
     // Join threads and its args data structures
     /*==================================PE0=======================================*/
     char *textA0Address = my_bus.cpus[0].cache.blocks[0].address;
@@ -331,9 +334,9 @@ int main(int argc, char *argv[])
     char *textA2Address = my_bus.cpus[0].cache.blocks[2].address;
     char *textA3Address = my_bus.cpus[0].cache.blocks[3].address;
 
-    //char textA0Data[4];
-   // sprintf(textA0Data,"%d",my_bus.cpus[0].cache.blocks[0].data); 
-    int *textA0Data = &(my_bus.cpus[0].cache.blocks[0].data); 
+    // char textA0Data[4];
+    // sprintf(textA0Data,"%d",my_bus.cpus[0].cache.blocks[0].data);
+    int *textA0Data = &(my_bus.cpus[0].cache.blocks[0].data);
     int *textA1Data = &(my_bus.cpus[0].cache.blocks[1].data);
     int *textA2Data = &(my_bus.cpus[0].cache.blocks[2].data);
     int *textA3Data = &(my_bus.cpus[0].cache.blocks[3].data);
@@ -348,11 +351,11 @@ int main(int argc, char *argv[])
     char *textB2Address = my_bus.cpus[1].cache.blocks[2].address;
     char *textB3Address = my_bus.cpus[1].cache.blocks[3].address;
 
-    //char *textB0Data = (char *)(intptr_t)my_bus.cpus[1].cache.blocks[0].data;
-    //char textB0Data[4];
-    //printf("The integer is: %d\n",my_bus.cpus[0].cache.blocks[0].data);
-   
-    int *textB0Data = &(my_bus.cpus[1].cache.blocks[0].data); 
+    // char *textB0Data = (char *)(intptr_t)my_bus.cpus[1].cache.blocks[0].data;
+    // char textB0Data[4];
+    // printf("The integer is: %d\n",my_bus.cpus[0].cache.blocks[0].data);
+
+    int *textB0Data = &(my_bus.cpus[1].cache.blocks[0].data);
     int *textB1Data = &(my_bus.cpus[1].cache.blocks[1].data);
     int *textB2Data = &(my_bus.cpus[1].cache.blocks[2].data);
     int *textB3Data = &(my_bus.cpus[1].cache.blocks[3].data);
@@ -368,7 +371,7 @@ int main(int argc, char *argv[])
     char *textC2Address = my_bus.cpus[2].cache.blocks[2].address;
     char *textC3Address = my_bus.cpus[2].cache.blocks[3].address;
 
-    int *textC0Data = &(my_bus.cpus[2].cache.blocks[0].data); 
+    int *textC0Data = &(my_bus.cpus[2].cache.blocks[0].data);
     int *textC1Data = &(my_bus.cpus[2].cache.blocks[1].data);
     int *textC2Data = &(my_bus.cpus[2].cache.blocks[2].data);
     int *textC3Data = &(my_bus.cpus[2].cache.blocks[3].data);
@@ -399,97 +402,92 @@ int main(int argc, char *argv[])
 
     /*==========================================================================*/
 
-
     guint timer_id;
     LabelData data01,
-    cpuDataAddress0,cpuDataAddress1,cpuDataAddress2,cpuDataAddress3,
-    cpuB0DataAddress0,cpuB1DataAddress1,cpuB2DataAddress2,cpuB3DataAddress3,
-    cpuC0DataAddress0,cpuC1DataAddress1,cpuC2DataAddress2,cpuC3DataAddress3;
-    LabelDataInt pe0Data0,pe0Data1,pe0Data2,pe0Data3;
-    LabelDataInt pe0State0,pe0State1,pe0State2,pe0State3;
-    LabelDataInt pe1Data0,pe1Data1,pe1Data2,pe1Data3;
-    LabelDataInt pe1State0,pe1State1,pe1State2,pe1State3;
-    LabelDataInt pe2Data0,pe2Data1,pe2Data2,pe2Data3;
-    LabelDataInt pe2State0,pe2State1,pe2State2,pe2State3;
-    LabelDataInt MD0,MD1,MD2,MD3,MD4,MD5,MD6,MD7,MD8,MD9,MD10,MD11,MD12,MD13,MD14,MD15;
+        cpuDataAddress0, cpuDataAddress1, cpuDataAddress2, cpuDataAddress3,
+        cpuB0DataAddress0, cpuB1DataAddress1, cpuB2DataAddress2, cpuB3DataAddress3,
+        cpuC0DataAddress0, cpuC1DataAddress1, cpuC2DataAddress2, cpuC3DataAddress3;
+    LabelDataInt pe0Data0, pe0Data1, pe0Data2, pe0Data3;
+    LabelDataInt pe0State0, pe0State1, pe0State2, pe0State3;
+    LabelDataInt pe1Data0, pe1Data1, pe1Data2, pe1Data3;
+    LabelDataInt pe1State0, pe1State1, pe1State2, pe1State3;
+    LabelDataInt pe2Data0, pe2Data1, pe2Data2, pe2Data3;
+    LabelDataInt pe2State0, pe2State1, pe2State2, pe2State3;
+    LabelDataInt MD0, MD1, MD2, MD3, MD4, MD5, MD6, MD7, MD8, MD9, MD10, MD11, MD12, MD13, MD14, MD15;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     grid = GTK_WIDGET(gtk_builder_get_object(builder, "mainGrid")); // Replace "my_grid" with your GtkGrid ID
 
-/*=================================Botones=====================================*/
-    start =GTK_WIDGET(gtk_builder_get_object(builder, "start"));
+    /*=================================Botones=====================================*/
+    start = GTK_WIDGET(gtk_builder_get_object(builder, "start"));
     g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
 
-/*=================================Botones=====================================*/
-    
-    a0Address =GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
-    a1Address=GTK_WIDGET(gtk_builder_get_object(builder, "a1Address"));
-    a2Address =GTK_WIDGET(gtk_builder_get_object(builder, "a2Address"));
-    a3Address=GTK_WIDGET(gtk_builder_get_object(builder, "a3Address"));
+    /*=================================Botones=====================================*/
+
+    a0Address = GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
+    a1Address = GTK_WIDGET(gtk_builder_get_object(builder, "a1Address"));
+    a2Address = GTK_WIDGET(gtk_builder_get_object(builder, "a2Address"));
+    a3Address = GTK_WIDGET(gtk_builder_get_object(builder, "a3Address"));
 
     a0Data = GTK_WIDGET(gtk_builder_get_object(builder, "a0Data"));
     a1Data = GTK_WIDGET(gtk_builder_get_object(builder, "a1Data"));
     a2Data = GTK_WIDGET(gtk_builder_get_object(builder, "a2Data"));
-    a3Data = GTK_WIDGET(gtk_builder_get_object(builder, "a3Data")); 
+    a3Data = GTK_WIDGET(gtk_builder_get_object(builder, "a3Data"));
 
-    a0state =GTK_WIDGET(gtk_builder_get_object(builder, "a0state"));
-    a1state =GTK_WIDGET(gtk_builder_get_object(builder, "a1state"));
-    a2state =GTK_WIDGET(gtk_builder_get_object(builder, "a2state"));
-    a3state =GTK_WIDGET(gtk_builder_get_object(builder, "a3state"));
+    a0state = GTK_WIDGET(gtk_builder_get_object(builder, "a0state"));
+    a1state = GTK_WIDGET(gtk_builder_get_object(builder, "a1state"));
+    a2state = GTK_WIDGET(gtk_builder_get_object(builder, "a2state"));
+    a3state = GTK_WIDGET(gtk_builder_get_object(builder, "a3state"));
 
-
-
-    b0Address =GTK_WIDGET(gtk_builder_get_object(builder, "b0Address"));
-    b1Address=GTK_WIDGET(gtk_builder_get_object(builder, "b1Address"));
-    b2Address =GTK_WIDGET(gtk_builder_get_object(builder, "b2Address"));
-    b3Address=GTK_WIDGET(gtk_builder_get_object(builder, "b3Address"));
+    b0Address = GTK_WIDGET(gtk_builder_get_object(builder, "b0Address"));
+    b1Address = GTK_WIDGET(gtk_builder_get_object(builder, "b1Address"));
+    b2Address = GTK_WIDGET(gtk_builder_get_object(builder, "b2Address"));
+    b3Address = GTK_WIDGET(gtk_builder_get_object(builder, "b3Address"));
 
     b0data = GTK_WIDGET(gtk_builder_get_object(builder, "b0data"));
     b1data = GTK_WIDGET(gtk_builder_get_object(builder, "b1data"));
     b2data = GTK_WIDGET(gtk_builder_get_object(builder, "b2data"));
-    b3data = GTK_WIDGET(gtk_builder_get_object(builder, "b3data")); 
-    
-    b0state =GTK_WIDGET(gtk_builder_get_object(builder, "b0state"));
-    b1state =GTK_WIDGET(gtk_builder_get_object(builder, "b1state"));
-    b2state =GTK_WIDGET(gtk_builder_get_object(builder, "b2state"));
-    b3state =GTK_WIDGET(gtk_builder_get_object(builder, "b3state"));
+    b3data = GTK_WIDGET(gtk_builder_get_object(builder, "b3data"));
 
+    b0state = GTK_WIDGET(gtk_builder_get_object(builder, "b0state"));
+    b1state = GTK_WIDGET(gtk_builder_get_object(builder, "b1state"));
+    b2state = GTK_WIDGET(gtk_builder_get_object(builder, "b2state"));
+    b3state = GTK_WIDGET(gtk_builder_get_object(builder, "b3state"));
 
-
-    c0Address =GTK_WIDGET(gtk_builder_get_object(builder, "c0Address"));
-    c1Address=GTK_WIDGET(gtk_builder_get_object(builder, "c1Address"));
-    c2Address =GTK_WIDGET(gtk_builder_get_object(builder, "c2Address"));
-    c3Address=GTK_WIDGET(gtk_builder_get_object(builder, "c3Address"));
+    c0Address = GTK_WIDGET(gtk_builder_get_object(builder, "c0Address"));
+    c1Address = GTK_WIDGET(gtk_builder_get_object(builder, "c1Address"));
+    c2Address = GTK_WIDGET(gtk_builder_get_object(builder, "c2Address"));
+    c3Address = GTK_WIDGET(gtk_builder_get_object(builder, "c3Address"));
 
     c0data = GTK_WIDGET(gtk_builder_get_object(builder, "c0data"));
     c1data = GTK_WIDGET(gtk_builder_get_object(builder, "c1data"));
     c2data = GTK_WIDGET(gtk_builder_get_object(builder, "c2data"));
-    c3data = GTK_WIDGET(gtk_builder_get_object(builder, "c3data")); 
-    
-    c0state =GTK_WIDGET(gtk_builder_get_object(builder, "c0state"));
-    c1state =GTK_WIDGET(gtk_builder_get_object(builder, "c1state"));
-    c2state =GTK_WIDGET(gtk_builder_get_object(builder, "c2state"));
-    c3state =GTK_WIDGET(gtk_builder_get_object(builder, "c3state"));
+    c3data = GTK_WIDGET(gtk_builder_get_object(builder, "c3data"));
 
-    data0 =GTK_WIDGET(gtk_builder_get_object(builder, "data0"));
-    data1 =GTK_WIDGET(gtk_builder_get_object(builder, "data1"));
-    data2 =GTK_WIDGET(gtk_builder_get_object(builder, "data2"));
-    data3 =GTK_WIDGET(gtk_builder_get_object(builder, "data3"));
-    data4 =GTK_WIDGET(gtk_builder_get_object(builder, "data4"));
-    data5 =GTK_WIDGET(gtk_builder_get_object(builder, "data5"));
-    data6 =GTK_WIDGET(gtk_builder_get_object(builder, "data6"));
-    data7 =GTK_WIDGET(gtk_builder_get_object(builder, "data7"));
-    data8 =GTK_WIDGET(gtk_builder_get_object(builder, "data8"));
-    data9 =GTK_WIDGET(gtk_builder_get_object(builder, "data9"));
-    data10 =GTK_WIDGET(gtk_builder_get_object(builder, "data10"));
-    data11 =GTK_WIDGET(gtk_builder_get_object(builder, "data11"));
-    data12 =GTK_WIDGET(gtk_builder_get_object(builder, "data12"));
-    data13 =GTK_WIDGET(gtk_builder_get_object(builder, "data13"));
-    data14 =GTK_WIDGET(gtk_builder_get_object(builder, "data14"));
-    data15 =GTK_WIDGET(gtk_builder_get_object(builder, "data15"));
-   
+    c0state = GTK_WIDGET(gtk_builder_get_object(builder, "c0state"));
+    c1state = GTK_WIDGET(gtk_builder_get_object(builder, "c1state"));
+    c2state = GTK_WIDGET(gtk_builder_get_object(builder, "c2state"));
+    c3state = GTK_WIDGET(gtk_builder_get_object(builder, "c3state"));
+
+    data0 = GTK_WIDGET(gtk_builder_get_object(builder, "data0"));
+    data1 = GTK_WIDGET(gtk_builder_get_object(builder, "data1"));
+    data2 = GTK_WIDGET(gtk_builder_get_object(builder, "data2"));
+    data3 = GTK_WIDGET(gtk_builder_get_object(builder, "data3"));
+    data4 = GTK_WIDGET(gtk_builder_get_object(builder, "data4"));
+    data5 = GTK_WIDGET(gtk_builder_get_object(builder, "data5"));
+    data6 = GTK_WIDGET(gtk_builder_get_object(builder, "data6"));
+    data7 = GTK_WIDGET(gtk_builder_get_object(builder, "data7"));
+    data8 = GTK_WIDGET(gtk_builder_get_object(builder, "data8"));
+    data9 = GTK_WIDGET(gtk_builder_get_object(builder, "data9"));
+    data10 = GTK_WIDGET(gtk_builder_get_object(builder, "data10"));
+    data11 = GTK_WIDGET(gtk_builder_get_object(builder, "data11"));
+    data12 = GTK_WIDGET(gtk_builder_get_object(builder, "data12"));
+    data13 = GTK_WIDGET(gtk_builder_get_object(builder, "data13"));
+    data14 = GTK_WIDGET(gtk_builder_get_object(builder, "data14"));
+    data15 = GTK_WIDGET(gtk_builder_get_object(builder, "data15"));
+
     addressPE1 = GTK_WIDGET(gtk_builder_get_object(builder, "addressPE1"));
     addressPE2 = GTK_WIDGET(gtk_builder_get_object(builder, "addressPE2"));
     addressPE3 = GTK_WIDGET(gtk_builder_get_object(builder, "addressPE3"));
@@ -513,19 +511,25 @@ int main(int argc, char *argv[])
 
     GtkCssProvider *cssProvider = gtk_css_provider_new();
     GtkStyleContext *styleContext,
-    *styleContext1,
-    *styleContext2,
-    *styleContext3,
-    *styleContext4,
-    *styleContext5,
-    *styleContext6,
-    *styleContext7,
-    *styleContext8,
-    *styleContext9;
+        *styleContext1,
+        *styleContext2,
+        *styleContext3,
+        *styleContext4,
+        *styleContext5,
+        *styleContext6,
+        *styleContext7,
+        *styleContext8,
+        *styleContext9,
+        *styleContext10,
+        *styleContext11,
+        *styleContext12,
+        *styleContext13,
+        *styleContext14,
+        *styleContext15;
+
     GError *error = NULL;
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(cssProvider), "style.css", &error);
 
-    
     styleContext1 = gtk_widget_get_style_context(addressPE2);
     styleContext2 = gtk_widget_get_style_context(dataPE1);
     styleContext7 = gtk_widget_get_style_context(addressPE1);
@@ -533,8 +537,15 @@ int main(int argc, char *argv[])
     styleContext4 = gtk_widget_get_style_context(a1);
     styleContext5 = gtk_widget_get_style_context(a2);
     styleContext6 = gtk_widget_get_style_context(a3);
+    styleContext8 = gtk_widget_get_style_context(c0);
+    styleContext9 = gtk_widget_get_style_context(c1);
+    styleContext10 = gtk_widget_get_style_context(c2);
+    styleContext11 = gtk_widget_get_style_context(c3);
+    styleContext12 = gtk_widget_get_style_context(b0);
+    styleContext13 = gtk_widget_get_style_context(b1);
+    styleContext14 = gtk_widget_get_style_context(b2);
+    styleContext15 = gtk_widget_get_style_context(b3);
 
-    
     gtk_style_context_add_class(styleContext1, "mainLabel");
     gtk_style_context_add_class(styleContext2, "mainLabel");
     gtk_style_context_add_class(styleContext3, "mainLabel");
@@ -542,9 +553,14 @@ int main(int argc, char *argv[])
     gtk_style_context_add_class(styleContext5, "mainLabel");
     gtk_style_context_add_class(styleContext6, "mainLabel");
     gtk_style_context_add_class(styleContext7, "mainLabel");
-
-    
-    
+    gtk_style_context_add_class(styleContext8, "mainLabel");
+    gtk_style_context_add_class(styleContext9, "mainLabel");
+    gtk_style_context_add_class(styleContext10, "mainLabel");
+    gtk_style_context_add_class(styleContext11, "mainLabel");
+    gtk_style_context_add_class(styleContext12, "mainLabel");
+    gtk_style_context_add_class(styleContext13, "mainLabel");
+    gtk_style_context_add_class(styleContext14, "mainLabel");
+    gtk_style_context_add_class(styleContext15, "mainLabel");
 
     gtk_style_context_add_provider(styleContext1, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -553,24 +569,29 @@ int main(int argc, char *argv[])
     gtk_style_context_add_provider(styleContext5, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext6, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext7, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-   /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    gtk_style_context_add_provider(styleContext5, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    gtk_style_context_add_provider(styleContext6, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    gtk_style_context_add_provider(styleContext7, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext8, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    gtk_style_context_add_provider(styleContext9, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);*/
-    
-   
+    gtk_style_context_add_provider(styleContext9, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext10, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext11, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext12, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext13, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext14, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext15, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext5, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext6, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext7, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext8, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+     gtk_style_context_add_provider(styleContext9, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);*/
+
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_builder_connect_signals(builder, NULL);
 
     const char *text = "PE1";
     const char *text1 = "PE2";
-
-   
 
     data01.label = label0;
     data01.text = text1;
@@ -585,11 +606,11 @@ int main(int argc, char *argv[])
     cpuDataAddress1.label = a1Address;
     cpuDataAddress1.text = textA1Address;
     cpuDataAddress1.color = "yellow";
-    
+
     cpuDataAddress2.label = a2Address;
     cpuDataAddress2.text = textA2Address;
     cpuDataAddress2.color = "yellow";
-    
+
     cpuDataAddress3.label = a3Address;
     cpuDataAddress3.text = textA3Address;
     cpuDataAddress3.color = "yellow";
@@ -601,28 +622,28 @@ int main(int argc, char *argv[])
     pe0Data1.label = a1Data;
     pe0Data1.text = textA1Data;
     pe0Data1.color = "yellow";
-    
+
     pe0Data2.label = a2Data;
     pe0Data2.text = textA2Data;
     pe0Data2.color = "yellow";
-     
+
     pe0Data3.label = a3Data;
     pe0Data3.text = textA3Data;
     pe0Data3.color = "yellow";
 
-    pe0State0.label = a0state ;
+    pe0State0.label = a0state;
     pe0State0.text = textA0State;
     pe0State0.color = "yellow";
 
-    pe0State1.label = a1state ;
+    pe0State1.label = a1state;
     pe0State1.text = textA1State;
     pe0State1.color = "yellow";
 
-    pe0State2.label = a2state ;
+    pe0State2.label = a2state;
     pe0State2.text = textA2State;
     pe0State2.color = "yellow";
 
-    pe0State3.label = a3state ;
+    pe0State3.label = a3state;
     pe0State3.text = textA3State;
     pe0State3.color = "yellow";
     /*=======================CPU 1========================*/
@@ -633,11 +654,11 @@ int main(int argc, char *argv[])
     cpuB1DataAddress1.label = b1Address;
     cpuB1DataAddress1.text = textB1Address;
     cpuB1DataAddress1.color = "yellow";
-    
+
     cpuB2DataAddress2.label = b2Address;
     cpuB2DataAddress2.text = textB2Address;
     cpuB2DataAddress2.color = "yellow";
-    
+
     cpuB3DataAddress3.label = b3Address;
     cpuB3DataAddress3.text = textB3Address;
     cpuB3DataAddress3.color = "yellow";
@@ -649,28 +670,28 @@ int main(int argc, char *argv[])
     pe1Data1.label = b1data;
     pe1Data1.text = textB1Data;
     pe1Data1.color = "yellow";
-    
+
     pe1Data2.label = b2data;
     pe1Data2.text = textB2Data;
     pe1Data2.color = "yellow";
-    
+
     pe1Data3.label = b3data;
     pe1Data3.text = textB3Data;
     pe1Data3.color = "yellow";
 
-    pe1State0.label = b0state ;
+    pe1State0.label = b0state;
     pe1State0.text = textB0State;
     pe1State0.color = "yellow";
 
-    pe1State1.label = b1state ;
+    pe1State1.label = b1state;
     pe1State1.text = textB1State;
     pe1State1.color = "yellow";
 
-    pe1State2.label = b2state ;
+    pe1State2.label = b2state;
     pe1State2.text = textB2State;
     pe1State2.color = "yellow";
 
-    pe1State3.label = b3state ;
+    pe1State3.label = b3state;
     pe1State3.text = textB3State;
     pe1State3.color = "yellow";
 
@@ -682,11 +703,11 @@ int main(int argc, char *argv[])
     cpuC1DataAddress1.label = c1Address;
     cpuC1DataAddress1.text = textC1Address;
     cpuC1DataAddress1.color = "yellow";
-    
+
     cpuC2DataAddress2.label = c2Address;
     cpuC2DataAddress2.text = textC2Address;
     cpuC2DataAddress2.color = "yellow";
-    
+
     cpuC3DataAddress3.label = c3Address;
     cpuC3DataAddress3.text = textC3Address;
     cpuC3DataAddress3.color = "yellow";
@@ -698,28 +719,28 @@ int main(int argc, char *argv[])
     pe2Data1.label = c1data;
     pe2Data1.text = textC1Data;
     pe2Data1.color = "yellow";
-    
+
     pe2Data2.label = c2data;
     pe2Data2.text = textC2Data;
     pe2Data2.color = "yellow";
-    
+
     pe2Data3.label = c3data;
     pe2Data3.text = textC3Data;
     pe2Data3.color = "yellow";
 
-    pe2State0.label = c0state ;
+    pe2State0.label = c0state;
     pe2State0.text = textC0State;
     pe2State0.color = "yellow";
 
-    pe2State1.label = c1state ;
+    pe2State1.label = c1state;
     pe2State1.text = textC1State;
     pe2State1.color = "yellow";
 
-    pe2State2.label = c2state ;
+    pe2State2.label = c2state;
     pe2State2.text = textC2State;
     pe2State2.color = "yellow";
 
-    pe2State3.label = c3state ;
+    pe2State3.label = c3state;
     pe2State3.text = textC3State;
     pe2State3.color = "yellow";
     /*=====================Memoria Principal==========================*/
@@ -755,7 +776,6 @@ int main(int argc, char *argv[])
     MD7.text = memoryData7;
     MD7.color = "yellow";
 
-    
     MD8.label = data8;
     MD8.text = memoryData8;
     MD8.color = "yellow";
@@ -787,7 +807,6 @@ int main(int argc, char *argv[])
     MD15.label = data15;
     MD15.text = memoryData15;
     MD15.color = "yellow";
-    
 
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
@@ -804,8 +823,6 @@ int main(int argc, char *argv[])
     guint timer_id19 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0State2);
     guint timer_id20 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0State3);
 
-
-
     guint timer_id9 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB0DataAddress0);
     guint timer_id10 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB1DataAddress1);
     guint timer_id11 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB2DataAddress2);
@@ -821,13 +838,11 @@ int main(int argc, char *argv[])
     guint timer_id27 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1State2);
     guint timer_id28 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1State3);
 
-
-
     guint timer_id13 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC0DataAddress0);
     guint timer_id14 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC1DataAddress1);
     guint timer_id15 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC2DataAddress2);
     guint timer_id16 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC3DataAddress3);
-    
+
     guint timer_id29 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data0);
     guint timer_id30 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data1);
     guint timer_id31 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data2);
@@ -838,8 +853,6 @@ int main(int argc, char *argv[])
     guint timer_id35 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2State2);
     guint timer_id36 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2State3);
 
-
-    
     guint timer_id37 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD0);
     guint timer_id38 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD1);
     guint timer_id39 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD2);
@@ -856,23 +869,18 @@ int main(int argc, char *argv[])
     guint timer_id50 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD13);
     guint timer_id51 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD14);
     guint timer_id52 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD15);
-    
-    
-  
 
-    //NO PONER NADA POR ABAJO DE ACA
+    // NO PONER NADA POR ABAJO DE ACA
     gtk_widget_show_all(window);
-    
 
     gtk_main();
 
     for (int i = 0; i < N_CPU; i++)
-    {  
+    {
         pthread_join(cpu_threads[i], NULL);
     }
-
 
     return 0;
 } // gcc -o mainUI mainUI.c `pkg-config --cflags --libs gtk+-3.0`
 // ./mainUI
-//gtk-builder-convert mockUp.glade memoryCoherence.ui
+// gtk-builder-convert mockUp.glade memoryCoherence.ui
