@@ -13,7 +13,7 @@ Cache get_core_cache(int cpu_id, struct bus *bus){
   return bus->cpus[cpu_id].cache;
 }
 
-void process_tasks(struct bus *bus, mqd_t mq, int busIsActive){
+void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
   // SIMULATE PROCESS DELAY
   //message = bus->channel;
   int access, core_id, block_id, data;
@@ -51,14 +51,14 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive){
     }
     else if (access == READMISS)
     {
-      process_readmiss(core_id, block_id, bus);
+      process_readmiss(core_id, block_id, bus, prot);
     }
     
     else printf("Access Error - %d not found", access);
     
-    for(int i =0; i < MEM_SIZE ; i++){
-      printf("Memoria Principal Address -> %s Data -> %d \n",bus->main_memory.entries[i].address , bus->main_memory.entries[i].data);
-    }
+    //for(int i =0; i < MEM_SIZE ; i++){
+    //  printf("Memoria Principal Address -> %s Data -> %d \n",bus->main_memory.entries[i].address , bus->main_memory.entries[i].data);
+    //}
     for(int i =0; i < CACHE_SIZE ; i++){
       printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[0].cache.blocks[i].tag ,bus->cpus[0].cache.blocks[i].address ,bus->cpus[0].cache.blocks[i].state ,bus->cpus[0].cache.blocks[i].data);
     }
@@ -76,7 +76,7 @@ void set_core_cache_block_state(int cpu_id, int block_index, struct bus *bus, in
   bus->cpus[cpu_id].cache.blocks[block_index].state = state;
 }
 
-void process_readmiss(int cpu_id, int block_index, struct bus *bus){
+void process_readmiss(int cpu_id, int block_index, struct bus *bus ,int prot){
   //If I do read and if I am writing on M or O I must do WB
   if(bus->cpus[cpu_id].cache.blocks[block_index].state == MODIFIED || bus->cpus[cpu_id].cache.blocks[block_index].state == OWNED){
     perform_wb(bus->channel.address,bus->cpus[cpu_id].cache.blocks[block_index].data, bus);
@@ -84,8 +84,16 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus){
     //printf("cpu : %d , block index: %d ,state : %d \n", cpu_id, block_index , bus->cpus[cpu_id].cache.blocks[block_index].state);
     printf("Readmiss Modified o Owned  Address: %s \n", bus->channel.address);
   }
-  // Now ask check if other cores has the block
-  int owned_data = seek_owned(bus->channel.address,cpu_id,bus);
+  int owned_data = 0;
+  if( prot == MOESI){
+    // Now ask check if other cores has the block
+    owned_data = seek_owned(bus->channel.address,cpu_id,bus);
+    printf("*****************************************************************************************");
+  }
+  else{
+    owned_data = -1; 
+  }
+  
   
   // If sponsors state is O or M then set block state to S
   if(owned_data != -1){
@@ -125,6 +133,7 @@ void process_writemiss(int cpu_id, int block_index, struct bus *bus, int value){
   bus->cpus[cpu_id].cache.blocks[block_index].data = bus->channel.value;
   snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
   seek_invalidate(bus->channel.address,cpu_id,bus);
+  bus->cpus[cpu_id].stats.INV++;
   printf("Writemiss Invalidate  Address: %s\n",bus->channel.address);
 }
 

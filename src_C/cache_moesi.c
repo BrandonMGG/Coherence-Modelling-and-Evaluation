@@ -19,7 +19,7 @@ void initializeCache(Cache* cache) {
 }
 
 // Escribe un bloque en la caché
-void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
+int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
     //mqd_t mq;
     //mq = create_message_queue();
     //srand(time(NULL));
@@ -52,19 +52,21 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t m
                 // Send the message to the queue
                 send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(1); // Sleep for 2 s
+                sleep(4); // Sleep for 2 s
 
-                strcpy((char*)message1, "Write Cache Miss");
+                return -1;
                 
                 
             }else{
                 cache->blocks[index].state = MODIFIED;
                 cache->blocks[index].data = data;
+                
                 //strcpy((char*)message, "Write Cache Hit");
                 printf("Write si estaba en cache y se modifico\n");
+                return 1;
                 
             }
-            break;
+            //break;
         }else{
             //no existe en cache
             /*enviar mensaje de message = {
@@ -84,16 +86,17 @@ void writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t m
             // Send the message to the queue
             send_message(mq, &message);
             // Sleep briefly to simulate processing time
-            sleep(1); // Sleep for 2 s
+            sleep(4); // Sleep for 2 s
 
             
             
             strcpy((char*)message1, "Write Cache Miss");
-            break;
+            //break;
+            return -1;
         }
         
     }
-    
+    return -1;
 }
 
 // Lee un bloque de la caché
@@ -129,7 +132,7 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
                 // Send the message to the queue
                 send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(1); // Sleep for 2 s
+                sleep(4); // Sleep for 2 s
                 strcpy((char*)message2, "Read Cache Miss");
                 
                 break;
@@ -152,7 +155,7 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
             // Send the message to the queue
             send_message(mq, &message);
             // Sleep briefly to simulate processing time
-            sleep(1); // Sleep for 2 s
+            sleep(4); // Sleep for 2 s
 
             strcpy((char*)message2, "Read Cache Miss");
             
@@ -165,16 +168,17 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
 
 // Función para seleccionar un bloque de caché con política write-back
 int getBlockIdWithWriteBackPolicy(Cache *cache) {
-    // Primero, busca bloques en estado 'M' (Modified)
+    // Primero, busca bloques en estado 'Invalid' 
+    
     for (int i = 0; i < CACHE_SIZE; i++) {
-        if (cache->blocks[i].state == MODIFIED) {
+        if (cache->blocks[i].state == INVALID) {
             return cache->blocks[i].tag;
         }
     }
 
-    // Si no hay bloques en estado 'M', busca bloques en estado 'E' (Exclusive)
+    // Si no hay bloques en estado 'I', busca bloques en estado 'M' (Modifield)
     for (int i = 0; i < CACHE_SIZE; i++) {
-        if (cache->blocks[i].state == EXCLUSIVE) {
+        if (cache->blocks[i].state == MODIFIED) {
             return cache->blocks[i].tag;
         }
     }

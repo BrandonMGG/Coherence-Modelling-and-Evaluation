@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#define MEM_SIZE 16 // 16 blocks of memory
+#define MEM_SIZE 4 // 16 blocks of memory
 #define DATA_SIZE 4 // each char value is 1 byte long, so data is 4 bytes long or 32-bit
 
 

@@ -30,7 +30,7 @@ int get_random_address() {
 
 int random_Hex() {
     // Generar un número aleatorio entre 0 y 15
-    int randomNumber = rand() % 16;
+    int randomNumber = rand() % INST_ADDRESS_SIZE;
 
     // Mostrar el número en formato hexadecimal con "0x"
     return randomNumber;
