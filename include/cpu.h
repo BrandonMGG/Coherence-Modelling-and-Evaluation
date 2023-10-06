@@ -17,8 +17,9 @@ struct CPU {
     int id; // Identificador de la CPU (por ejemplo, 'A', 'B', 'C', ...)
     Cache cache;//estructura de cache
     struct Stats stats;
-};
+    struct Instruction instruction;
 
+};
 
 // Función para ejecutar una instrucción en la CPU
 void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t mq);
