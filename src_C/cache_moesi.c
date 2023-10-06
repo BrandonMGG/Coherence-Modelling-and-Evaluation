@@ -48,9 +48,9 @@ int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq
                 snprintf(message.address, sizeof(message.address), "%s", address);
                 message.value = data;
                 message.block_id = index;
-                printf("Write esta en Modified o Exclusive\n");
+                printf("Write esta en cach[e pero no en Modified o Exclusive\n");
                 // Send the message to the queue
-                send_message(mq, &message);
+                //send_message(mq, &message);
                 // Sleep briefly to simulate processing time
                 sleep(4); // Sleep for 2 s
 
@@ -84,7 +84,7 @@ int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq
             message.value = data;
             printf("Write no esta en cache\n");
             // Send the message to the queue
-            send_message(mq, &message);
+            //send_message(mq, &message);
             // Sleep briefly to simulate processing time
             sleep(4); // Sleep for 2 s
 
@@ -111,7 +111,7 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
             index = cache->blocks[i].tag;
             if(cache->blocks[index].state != INVALID){
                 //retorna valor de cache
-                strcpy((char*)message2, "Read Cache Hit");
+                //strcpy((char*)message2, "Read Cache Hit");
                 printf("Read esta en cache\n");
                 break;
             }else{
@@ -130,10 +130,10 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
                 message.block_id = cache->blocks[index].tag;
                 printf("Read esta en cache pero en Invalid\n");
                 // Send the message to the queue
-                send_message(mq, &message);
+                //send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(4); // Sleep for 2 s
-                strcpy((char*)message2, "Read Cache Miss");
+                //sleep(4); // Sleep for 2 s
+                //strcpy((char*)message2, "Read Cache Miss");
                 
                 break;
             }
@@ -151,13 +151,13 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
             message.access = 0;
             snprintf(message.address, sizeof(message.address), "%s", address);
             message.block_id = getBlockIdWithWriteBackPolicy(cache);
-            printf("Read no esta en cache\n");
+            printf("Read no esta en cache write back\n");
             // Send the message to the queue
-            send_message(mq, &message);
+            //send_message(mq, &message);
             // Sleep briefly to simulate processing time
-            sleep(4); // Sleep for 2 s
+            //sleep(4); // Sleep for 2 s
 
-            strcpy((char*)message2, "Read Cache Miss");
+            //strcpy((char*)message2, "Read Cache Miss write back");
             
             break;
         }
@@ -214,23 +214,108 @@ int getCacheBlock_by_address(Cache* cache, char address[SIZE]) {
     }
     return -1;
 }
+
 /*
 int main() {
     Cache cache;
     initializeCache(&cache);
+    printf("-------------------------------------------Inicializa la Caché----------------------------------------\n");
+    
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Inicializa la Caché----------------------------------------\n");
 
     int tag = 1;
     int data = 45;
+    char address[SIZE]= "0xB";
+    int id =1;
+    mqd_t mq;
+    /*
+    printf("-------------------------------------------Write Caso 1----------------------------------------\n");
+    printf("Datos de entrada -> Address: %s ,Dato: %d ,ID core: %d \n",address,data,id);
+    writeCacheBlock( &cache,  address, data, id,  mq);
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Write Caso 1----------------------------------------\n");
 
-    writeCacheBlock(&cache, tag, data);
+    
+    snprintf(cache.blocks[0].address, sizeof(cache.blocks[0].address), "0xB");
+    printf("-------------------------------------------Write Caso 2----------------------------------------\n");
+    printf("Se agrego el address 0xB al bloque 0\n");
+    printf("Datos de entrada -> Address: %s ,Dato: %d ,ID core: %d \n",address,data,id);
+    writeCacheBlock( &cache,  address, data, id,  mq);
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Write Caso 2----------------------------------------\n");
 
-    readCacheBlock(&cache, tag);
+    cache.blocks[0].state= MODIFIED;
+    printf("-------------------------------------------Write Caso 3----------------------------------------\n");
+    printf("Se agrego el address 0xB al bloque 0\n");
+    printf("Se agrego el estado MODIFIELD o 3 al bloque 0\n");
+    printf("Datos de entrada -> Address: %s ,Dato: %d ,ID core: %d \n",address,data,id);
+    writeCacheBlock( &cache,  address, data, id,  mq);
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Write Caso 3----------------------------------------\n");
+    
+    printf("-------------------------------------------Read Caso 1----------------------------------------\n");
+    printf("Datos de entrada -> Address: %s ,Dato: %d ,ID core: %d \n",address,data,id);
+    readCacheBlock(&cache, address,  id, mq);
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Read Caso 1----------------------------------------\n");
 
-    writeCacheBlock(&cache, 2, 40);
+    snprintf(cache.blocks[0].address, sizeof(cache.blocks[0].address), "0xB");
+    cache.blocks[0].data =9;
+    printf("-------------------------------------------Read Caso 2----------------------------------------\n");
+    printf("Se agrego el address 0xB al bloque 0, con dato = 9\n");
+    printf("Datos de entrada -> Address: %s ,Dato: %d ,ID core: %d \n",address,data,id);
+    readCacheBlock(&cache, address,  id, mq);
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Read Caso 2----------------------------------------\n");
 
-    setCacheBlockState(&cache, 2, EXCLUSIVE);
+    
+    cache.blocks[0].state= MODIFIED;
+    printf("-------------------------------------------Read Caso 3----------------------------------------\n");
+    printf("Se agrego el address 0xB al bloque 0, con dato = 9\n");
+    printf("Se agrego el estado MODIFIELD o 3 al bloque 0\n");
+    printf("Datos de entrada -> Address: %s ,Dato: %d ,ID core: %d \n",address,data,id);
+    readCacheBlock(&cache, address,  id, mq);
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+    printf("-------------------------------------------Read Caso 3----------------------------------------\n");
+    
+    snprintf(cache.blocks[0].address, sizeof(cache.blocks[0].address), "0xA");
+    cache.blocks[0].data =9;
+    cache.blocks[0].state= SHARED;
 
-    getCacheBlockInfo(&cache, 2);
+    snprintf(cache.blocks[1].address, sizeof(cache.blocks[1].address), "0xB");
+    cache.blocks[1].data =11;
+    cache.blocks[1].state= OWNED;
+    
+    snprintf(cache.blocks[2].address, sizeof(cache.blocks[2].address), "0xC");
+    cache.blocks[2].data =23;
+    cache.blocks[2].state= MODIFIED;
+
+    snprintf(cache.blocks[3].address, sizeof(cache.blocks[3].address), "0xD");
+    cache.blocks[3].data =4;
+    cache.blocks[3].state= EXCLUSIVE;
+
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",cache.blocks[i].tag ,cache.blocks[i].address ,cache.blocks[i].state ,cache.blocks[i].data);
+    }
+
+    printf("Resultado de Write-Back = %d \n",getBlockIdWithWriteBackPolicy(&cache));
+
+    printf("Resultado de Pedir tag de caché por Address 0xB = %d \n",getCacheBlock_by_address(&cache,"0xB"));
 
     return 0;
 }

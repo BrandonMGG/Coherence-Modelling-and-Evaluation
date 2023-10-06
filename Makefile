@@ -18,6 +18,12 @@ controller: src_C/cache_moesi.c src_C/cpu.c src_C/controller.c $(inc_cache) $(in
 simulator: src_C/memory.c src_C/messages.c src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c src_C/bus.c src_C/simulator.c $(inc_memory) $(inc_cache) $(inc_rand) $(inc_cpu) $(inc_msg)
 	$(CC) $(CFLAGS) -o bin/simulator src_C/memory.c src_C/messages.c src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c src_C/bus.c src_C/simulator.c -lrt -lpthread
 
+cache: src_C/cache_moesi.c  $(inc_cache) $(inc_rand) $(inc_cpu)
+	$(CC) $(CFLAGS) -o bin/cache src_C/cache_moesi.c  -lrt -lpthread
+
+run_cache:
+	bin/cache
+
 run_bus:
 	bin/bus
 

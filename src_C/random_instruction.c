@@ -67,7 +67,7 @@ void get_random_instruction(struct Instruction *instr) {
         sprintf(instr->address, "0x%X", random_Hex());
         instr->data = get_random_data();
     } else {
-        sprintf(instr->op, "READ");
+        sprintf(instr->op, "INCR");
         sprintf(instr->address, "0x%X", random_Hex());
         instr->data= 0;
     }
@@ -83,7 +83,7 @@ int main() {
     // Generar y mostrar instrucciones aleatorias
     for (int i = 0; i < 10; i++) {
         get_random_instruction(&instructions[i]);
-        printf("Instrucción %d: Op=%s, Address=%s, Data=%s\n", i + 1, instructions[i].op, instructions[i].address, instructions[i].data);
+        printf("Instrucción %d: Op=%s, Address=%s, Data=%d\n", i + 1, instructions[i].op, instructions[i].address, instructions[i].data);
     }
     
     return 0;

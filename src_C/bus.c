@@ -20,17 +20,25 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
   CacheBlock block;
   Cache local_cache;
 
-  while (busIsActive == 1)
-  {
+  //while (busIsActive == 1)
+  //{
 
-    if (mq_receive(mq, (char *)&message, sizeof(struct Message), NULL) == -1) {
-            perror("mq_receive");
-            break;
-        }
+    //if (mq_receive(mq, (char *)&message, sizeof(struct Message), NULL) == -1) {
+    //        perror("mq_receive");
+            //break;
+    //    }
+    
+
+    message.access = READMISS;
+    snprintf(message.address, sizeof(message.address), "0xD");
+    message.block_id = 0;
+    message.id = 0;
+    message.value = 34;
     bus->channel = message;
+
     // Process the received message (e.g., trigger cache coherence actions)
-    printf("Received message: id=%d, access=%d, address=%s, block_id=%d\n",
-        message.id, message.access, message.address, message.block_id);
+    printf("Received message: id=%d, access=%d, address=%s, block_id=%d  value= %d\n",
+        message.id, message.access, message.address, message.block_id, message.value);
 
     access = message.access;
 
@@ -56,9 +64,9 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
     
     else printf("Access Error - %d not found", access);
     
-    //for(int i =0; i < MEM_SIZE ; i++){
-    //  printf("Memoria Principal Address -> %s Data -> %d \n",bus->main_memory.entries[i].address , bus->main_memory.entries[i].data);
-    //}
+    for(int i =0; i < MEM_SIZE ; i++){
+      printf("Memoria Principal Address -> %s Data -> %d \n",bus->main_memory.entries[i].address , bus->main_memory.entries[i].data);
+    }
     for(int i =0; i < CACHE_SIZE ; i++){
       printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[0].cache.blocks[i].tag ,bus->cpus[0].cache.blocks[i].address ,bus->cpus[0].cache.blocks[i].state ,bus->cpus[0].cache.blocks[i].data);
     }
@@ -68,7 +76,7 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
 
     
 
-  }
+  //}
   
 }
 
@@ -88,10 +96,11 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus ,int prot){
   if( prot == MOESI){
     // Now ask check if other cores has the block
     owned_data = seek_owned(bus->channel.address,cpu_id,bus);
-    printf("*****************************************************************************************");
+    printf("*******************************Con Protocolo MOESI**********************************************************\n");
   }
   else{
     owned_data = -1; 
+    printf("*******************************Con Protocolo MESI**********************************************************\n");
   }
   
   
@@ -100,7 +109,7 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus ,int prot){
     bus->cpus[cpu_id].cache.blocks[block_index].state = SHARED;
     bus->cpus[cpu_id].cache.blocks[block_index].data = owned_data; 
     snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address), "%s",bus->channel.address);
-    printf("Readmiss Si hay otro bloque en estado Owned Address: %s \n", bus->channel.address);
+    printf("Readmiss Si hay otro bloque en estado Owned o Modified Address: %s \n", bus->channel.address);
   //If no sponsors
   }else {
     // Check if address is E or S in another node
@@ -110,7 +119,7 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus ,int prot){
       bus->cpus[cpu_id].cache.blocks[block_index].state = SHARED;
       bus->cpus[cpu_id].cache.blocks[block_index].data = shared_data;
       snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
-      printf("Readmiss NO hay otro bloque en Owned pero si en Shared  Address: %s\n", bus->channel.address);
+      printf("Readmiss NO hay otro bloque en Owned o Modified pero si en Shared  Address: %s\n", bus->channel.address);
     }else{
       //Then no one have the value, read from memory then set block state to E
       int mem_data = get_data_from_memory(&bus->main_memory,bus->channel.address);
@@ -200,6 +209,7 @@ int seek_shared(char * local_address, int requester_id, struct bus *bus){
       {
         /* cache read delay, add RD transaction to stats */
         set_core_cache_block_state(core_id, block_index, bus, SHARED);
+        bus->cpus[core_id].stats.READ_REQ_RESP++;
         return block.data;
       }     
 
@@ -241,37 +251,65 @@ void seek_invalidate(char * local_address, int requester_id, struct bus * bus){
 
 
 
-// int main() {
-//   //main memory test
-//   //test();
+int main() {
+    //main memory test
+    //test();
+    struct memory main_memory;
+    struct bus my_bus;
 
-//   struct memory main_memory;
-//   struct bus my_bus;
+    //Bus ops testing
+    memory_init(&main_memory);
+    my_bus.main_memory = main_memory; 
+    /*
+    perform_wb("0xF", 65, &my_bus);
+    for(int i =0; i < MEM_SIZE ; i++){
+      printf("Memoria Principal Address -> %s Data -> %d \n",my_bus.main_memory.entries[i].address , my_bus.main_memory.entries[i].data);
+    }
+    int data = get_data_from_memory(&(my_bus.main_memory), "0xF");
+    printf("Data at address 0xF: %d\n", data);
+    printf("----------------------------------------------------------------\n");
+    */
 
-//   //Bus ops testing
-//   memory_init(&main_memory);
-//   my_bus.main_memory = main_memory; 
 
-//   perform_wb("F", 65, &my_bus);
+    // Bus queue test
+    mqd_t mq;
 
-//   int data = get_data_from_memory(&(my_bus.main_memory), "F");
-//   printf("Data at address 0xf: %d\n", data);
+    // Open the message queue
+    mq = mq_open(MQ_NAME, O_RDONLY);
+    if (mq == (mqd_t)-1) {
+        perror("mq_open");
+        exit(1);
+    }
+    my_bus.cpus[0].id =0;
+    initializeCache(&my_bus.cpus[0].cache);
 
+    my_bus.cpus[1].id =1;
+    initializeCache(&my_bus.cpus[1].cache);
 
-//   // Bus queue test
-//   mqd_t mq;
+    my_bus.cpus[0].cache.blocks[0].data = 4;
+    my_bus.cpus[0].cache.blocks[0].state = SHARED;
+    snprintf(my_bus.cpus[0].cache.blocks[0].address, sizeof(my_bus.cpus[0].cache.blocks[0].address), "0xD");
+    
+    my_bus.cpus[1].cache.blocks[3].data = 6;
+    my_bus.cpus[1].cache.blocks[3].state = MODIFIED;
+    snprintf(my_bus.cpus[1].cache.blocks[3].address, sizeof(my_bus.cpus[0].cache.blocks[0].address), "0xD");
 
-//   // Open the message queue
-//   mq = mq_open(MQ_NAME, O_RDONLY);
-//   if (mq == (mqd_t)-1) {
-//       perror("mq_open");
-//       exit(1);
-//   }
+    my_bus.main_memory.entries[13].data = 15;
 
-//   process_tasks(&my_bus, mq, 1);
+    for(int i =0; i < MEM_SIZE ; i++){
+        printf("Memoria Principal Address -> %s Data -> %d \n",my_bus.main_memory.entries[i].address , my_bus.main_memory.entries[i].data);
+    }
+      for(int i =0; i < CACHE_SIZE ; i++){
+        printf("Cache 0 Tag -> %d Address -> %s State -> %d Value -> %d \n",my_bus.cpus[0].cache.blocks[i].tag ,my_bus.cpus[0].cache.blocks[i].address ,my_bus.cpus[0].cache.blocks[i].state ,my_bus.cpus[0].cache.blocks[i].data);
+    }
+      for(int i =0; i < CACHE_SIZE ; i++){
+        printf("Cache 1 Tag -> %d Address -> %s State -> %d Value -> %d \n",my_bus.cpus[1].cache.blocks[i].tag ,my_bus.cpus[1].cache.blocks[i].address ,my_bus.cpus[1].cache.blocks[i].state ,my_bus.cpus[1].cache.blocks[i].data);
+    }
+    printf("----------------------------------------Inicial-----------------------------------------\n");
+    process_tasks(&my_bus, mq, 1, MESI);
 
-//   // Close the message queue
-//   mq_close(mq);
+    // Close the message queue
+    mq_close(mq);
 
-//   return 0;
-// }
+    return 0;
+ }
