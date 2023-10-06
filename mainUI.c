@@ -148,7 +148,15 @@ GtkWidget *window, *grid,
 *address6,
 *address5,
 *address4,
-*address7;
+*address7,
+*data8,
+*data9,
+*data10,
+*data11,
+*data12,
+*data13,
+*data14,
+*data15;
 GtkWidget *addressPE2;
 
 GtkWidget *label0, *label1;
@@ -320,10 +328,10 @@ int main(int argc, char *argv[])
     int *textA2Data = &(my_bus.cpus[0].cache.blocks[2].data);
     int *textA3Data = &(my_bus.cpus[0].cache.blocks[3].data);
 
-    // char *textA0State = my_bus.cpus[0].cache.blocks[0].state;
-    // char *textA1State = my_bus.cpus[0].cache.blocks[1].state;
-    // char *textA2State = my_bus.cpus[0].cache.blocks[2].state;
-    // char *textA3State = my_bus.cpus[0].cache.blocks[3].state;
+    int *textA0State = &(my_bus.cpus[0].cache.blocks[0].state);
+    int *textA1State = &(my_bus.cpus[0].cache.blocks[1].state);
+    int *textA2State = &(my_bus.cpus[0].cache.blocks[2].state);
+    int *textA3State = &(my_bus.cpus[0].cache.blocks[3].state);
     /*==================================PE1=======================================*/
     char *textB0Address = my_bus.cpus[1].cache.blocks[0].address;
     char *textB1Address = my_bus.cpus[1].cache.blocks[1].address;
@@ -331,17 +339,18 @@ int main(int argc, char *argv[])
     char *textB3Address = my_bus.cpus[1].cache.blocks[3].address;
 
     //char *textB0Data = (char *)(intptr_t)my_bus.cpus[1].cache.blocks[0].data;
-    char textB0Data[4];
-    printf("The integer is: %d\n",my_bus.cpus[0].cache.blocks[0].data);
+    //char textB0Data[4];
+    //printf("The integer is: %d\n",my_bus.cpus[0].cache.blocks[0].data);
    
-    char *textB1Data = (char)my_bus.cpus[1].cache.blocks[1].data;
-    char *textB2Data = (char)my_bus.cpus[1].cache.blocks[2].data;
-    char *textB3Data = (char)my_bus.cpus[1].cache.blocks[3].data;
+    int *textB0Data = &(my_bus.cpus[1].cache.blocks[0].data); 
+    int *textB1Data = &(my_bus.cpus[1].cache.blocks[1].data);
+    int *textB2Data = &(my_bus.cpus[1].cache.blocks[2].data);
+    int *textB3Data = &(my_bus.cpus[1].cache.blocks[3].data);
 
-    char *textB0State = (char*)my_bus.cpus[1].cache.blocks[0].state;
-    char *textB1State = (char*)my_bus.cpus[1].cache.blocks[1].state;
-    char *textB2State = (char*)my_bus.cpus[1].cache.blocks[2].state;
-    char *textB3State = (char*)my_bus.cpus[1].cache.blocks[3].state;
+    int *textB0State = &(my_bus.cpus[1].cache.blocks[0].state);
+    int *textB1State = &(my_bus.cpus[1].cache.blocks[1].state);
+    int *textB2State = &(my_bus.cpus[1].cache.blocks[2].state);
+    int *textB3State = &(my_bus.cpus[1].cache.blocks[3].state);
 
     /*=================================PE2=========================================*/
     char *textC0Address = my_bus.cpus[2].cache.blocks[0].address;
@@ -349,46 +358,122 @@ int main(int argc, char *argv[])
     char *textC2Address = my_bus.cpus[2].cache.blocks[2].address;
     char *textC3Address = my_bus.cpus[2].cache.blocks[3].address;
 
+    int *textC0Data = &(my_bus.cpus[2].cache.blocks[0].data); 
+    int *textC1Data = &(my_bus.cpus[2].cache.blocks[1].data);
+    int *textC2Data = &(my_bus.cpus[2].cache.blocks[2].data);
+    int *textC3Data = &(my_bus.cpus[2].cache.blocks[3].data);
+
+    int *textC0State = &(my_bus.cpus[2].cache.blocks[0].state);
+    int *textC1State = &(my_bus.cpus[2].cache.blocks[1].state);
+    int *textC2State = &(my_bus.cpus[2].cache.blocks[2].state);
+    int *textC3State = &(my_bus.cpus[2].cache.blocks[3].state);
+
+    /*=================================Memoria Principal=========================================*/
+
+    int *memoryData0 = &(my_bus.main_memory.entries[0].data);
+    int *memoryData1 = &(my_bus.main_memory.entries[1].data);
+    int *memoryData2 = &(my_bus.main_memory.entries[2].data);
+    int *memoryData3 = &(my_bus.main_memory.entries[3].data);
+    int *memoryData4 = &(my_bus.main_memory.entries[4].data);
+    int *memoryData5 = &(my_bus.main_memory.entries[5].data);
+    int *memoryData6 = &(my_bus.main_memory.entries[6].data);
+    int *memoryData7 = &(my_bus.main_memory.entries[7].data);
+    int *memoryData8 = &(my_bus.main_memory.entries[8].data);
+    int *memoryData9 = &(my_bus.main_memory.entries[9].data);
+    int *memoryData10 = &(my_bus.main_memory.entries[10].data);
+    int *memoryData11 = &(my_bus.main_memory.entries[11].data);
+    int *memoryData12 = &(my_bus.main_memory.entries[12].data);
+    int *memoryData13 = &(my_bus.main_memory.entries[13].data);
+    int *memoryData14 = &(my_bus.main_memory.entries[14].data);
+    int *memoryData15 = &(my_bus.main_memory.entries[15].data);
+
+    /*==========================================================================*/
 
 
     guint timer_id;
-    LabelData data1,
+    LabelData data01,
     cpuDataAddress0,cpuDataAddress1,cpuDataAddress2,cpuDataAddress3,
     cpuB0DataAddress0,cpuB1DataAddress1,cpuB2DataAddress2,cpuB3DataAddress3,
     cpuC0DataAddress0,cpuC1DataAddress1,cpuC2DataAddress2,cpuC3DataAddress3;
     LabelDataInt pe0Data0,pe0Data1,pe0Data2,pe0Data3;
+    LabelDataInt pe0State0,pe0State1,pe0State2,pe0State3;
+    LabelDataInt pe1Data0,pe1Data1,pe1Data2,pe1Data3;
+    LabelDataInt pe1State0,pe1State1,pe1State2,pe1State3;
+    LabelDataInt pe2Data0,pe2Data1,pe2Data2,pe2Data3;
+    LabelDataInt pe2State0,pe2State1,pe2State2,pe2State3;
+    LabelDataInt MD0,MD1,MD2,MD3,MD4,MD5,MD6,MD7,MD8,MD9,MD10,MD11,MD12,MD13,MD14,MD15;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     grid = GTK_WIDGET(gtk_builder_get_object(builder, "mainGrid")); // Replace "my_grid" with your GtkGrid ID
 
+    
+    a0Address =GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
+    a1Address=GTK_WIDGET(gtk_builder_get_object(builder, "a1Address"));
+    a2Address =GTK_WIDGET(gtk_builder_get_object(builder, "a2Address"));
+    a3Address=GTK_WIDGET(gtk_builder_get_object(builder, "a3Address"));
+
+    a0Data = GTK_WIDGET(gtk_builder_get_object(builder, "a0Data"));
+    a1Data = GTK_WIDGET(gtk_builder_get_object(builder, "a1Data"));
+    a2Data = GTK_WIDGET(gtk_builder_get_object(builder, "a2Data"));
+    a3Data = GTK_WIDGET(gtk_builder_get_object(builder, "a3Data")); 
+
     a0state =GTK_WIDGET(gtk_builder_get_object(builder, "a0state"));
     a1state =GTK_WIDGET(gtk_builder_get_object(builder, "a1state"));
     a2state =GTK_WIDGET(gtk_builder_get_object(builder, "a2state"));
     a3state =GTK_WIDGET(gtk_builder_get_object(builder, "a3state"));
 
-    a0Address =GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
-    a1Address=GTK_WIDGET(gtk_builder_get_object(builder, "a1Address"));
-    a2Address =GTK_WIDGET(gtk_builder_get_object(builder, "a2Address"));
-    a3Address=GTK_WIDGET(gtk_builder_get_object(builder, "a3Address"));
+
 
     b0Address =GTK_WIDGET(gtk_builder_get_object(builder, "b0Address"));
     b1Address=GTK_WIDGET(gtk_builder_get_object(builder, "b1Address"));
     b2Address =GTK_WIDGET(gtk_builder_get_object(builder, "b2Address"));
     b3Address=GTK_WIDGET(gtk_builder_get_object(builder, "b3Address"));
 
+    b0data = GTK_WIDGET(gtk_builder_get_object(builder, "b0data"));
+    b1data = GTK_WIDGET(gtk_builder_get_object(builder, "b1data"));
+    b2data = GTK_WIDGET(gtk_builder_get_object(builder, "b2data"));
+    b3data = GTK_WIDGET(gtk_builder_get_object(builder, "b3data")); 
+    
+    b0state =GTK_WIDGET(gtk_builder_get_object(builder, "b0state"));
+    b1state =GTK_WIDGET(gtk_builder_get_object(builder, "b1state"));
+    b2state =GTK_WIDGET(gtk_builder_get_object(builder, "b2state"));
+    b3state =GTK_WIDGET(gtk_builder_get_object(builder, "b3state"));
+
+
+
     c0Address =GTK_WIDGET(gtk_builder_get_object(builder, "c0Address"));
     c1Address=GTK_WIDGET(gtk_builder_get_object(builder, "c1Address"));
     c2Address =GTK_WIDGET(gtk_builder_get_object(builder, "c2Address"));
     c3Address=GTK_WIDGET(gtk_builder_get_object(builder, "c3Address"));
 
-    a0Data = GTK_WIDGET(gtk_builder_get_object(builder, "a0Data"));
-    a1Data = GTK_WIDGET(gtk_builder_get_object(builder, "a1Data"));
-    a2Data = GTK_WIDGET(gtk_builder_get_object(builder, "a2Data"));
-    a3Data = GTK_WIDGET(gtk_builder_get_object(builder, "a3Data"));
+    c0data = GTK_WIDGET(gtk_builder_get_object(builder, "c0data"));
+    c1data = GTK_WIDGET(gtk_builder_get_object(builder, "c1data"));
+    c2data = GTK_WIDGET(gtk_builder_get_object(builder, "c2data"));
+    c3data = GTK_WIDGET(gtk_builder_get_object(builder, "c3data")); 
+    
+    c0state =GTK_WIDGET(gtk_builder_get_object(builder, "c0state"));
+    c1state =GTK_WIDGET(gtk_builder_get_object(builder, "c1state"));
+    c2state =GTK_WIDGET(gtk_builder_get_object(builder, "c2state"));
+    c3state =GTK_WIDGET(gtk_builder_get_object(builder, "c3state"));
 
-   
+    data0 =GTK_WIDGET(gtk_builder_get_object(builder, "data0"));
+    data1 =GTK_WIDGET(gtk_builder_get_object(builder, "data1"));
+    data2 =GTK_WIDGET(gtk_builder_get_object(builder, "data2"));
+    data3 =GTK_WIDGET(gtk_builder_get_object(builder, "data3"));
+    data4 =GTK_WIDGET(gtk_builder_get_object(builder, "data4"));
+    data5 =GTK_WIDGET(gtk_builder_get_object(builder, "data5"));
+    data6 =GTK_WIDGET(gtk_builder_get_object(builder, "data6"));
+    data7 =GTK_WIDGET(gtk_builder_get_object(builder, "data7"));
+    data8 =GTK_WIDGET(gtk_builder_get_object(builder, "data8"));
+    data9 =GTK_WIDGET(gtk_builder_get_object(builder, "data9"));
+    data10 =GTK_WIDGET(gtk_builder_get_object(builder, "data10"));
+    data11 =GTK_WIDGET(gtk_builder_get_object(builder, "data11"));
+    data12 =GTK_WIDGET(gtk_builder_get_object(builder, "data12"));
+    data13 =GTK_WIDGET(gtk_builder_get_object(builder, "data13"));
+    data14 =GTK_WIDGET(gtk_builder_get_object(builder, "data14"));
+    data15 =GTK_WIDGET(gtk_builder_get_object(builder, "data15"));
    
 
     addressPE2 = GTK_WIDGET(gtk_builder_get_object(builder, "addressPE2"));
@@ -454,11 +539,11 @@ int main(int argc, char *argv[])
 
    
 
-    data1.label = label0;
-    data1.text = text1;
-    data1.color = "white";
+    data01.label = label0;
+    data01.text = text1;
+    data01.color = "white";
 
-    /*===============================================*/
+    /*=====================CPU 0 ==========================*/
 
     cpuDataAddress0.label = a0Address;
     cpuDataAddress0.text = textA0Address;
@@ -475,7 +560,39 @@ int main(int argc, char *argv[])
     cpuDataAddress3.label = a3Address;
     cpuDataAddress3.text = textA3Address;
     cpuDataAddress3.color = "yellow";
-    /*===============================================*/
+
+    pe0Data0.label = a0Data;
+    pe0Data0.text = textA0Data;
+    pe0Data0.color = "yellow";
+
+    pe0Data1.label = a1Data;
+    pe0Data1.text = textA1Data;
+    pe0Data1.color = "yellow";
+    
+    pe0Data2.label = a2Data;
+    pe0Data2.text = textA2Data;
+    pe0Data2.color = "yellow";
+    
+    pe0Data3.label = a3Data;
+    pe0Data3.text = textA3Data;
+    pe0Data3.color = "yellow";
+
+    pe0State0.label = a0state ;
+    pe0State0.text = textA0State;
+    pe0State0.color = "yellow";
+
+    pe0State1.label = a1state ;
+    pe0State1.text = textA1State;
+    pe0State1.color = "yellow";
+
+    pe0State2.label = a2state ;
+    pe0State2.text = textA2State;
+    pe0State2.color = "yellow";
+
+    pe0State3.label = a3state ;
+    pe0State3.text = textA3State;
+    pe0State3.color = "yellow";
+    /*=======================CPU 1========================*/
     cpuB0DataAddress0.label = b0Address;
     cpuB0DataAddress0.text = textB0Address;
     cpuB0DataAddress0.color = "yellow";
@@ -492,7 +609,39 @@ int main(int argc, char *argv[])
     cpuB3DataAddress3.text = textB3Address;
     cpuB3DataAddress3.color = "yellow";
 
-    /*===============================================*/
+    pe1Data0.label = b0data;
+    pe1Data0.text = textB0Data;
+    pe1Data0.color = "yellow";
+
+    pe1Data1.label = b1data;
+    pe1Data1.text = textB1Data;
+    pe1Data1.color = "yellow";
+    
+    pe1Data2.label = b2data;
+    pe1Data2.text = textB2Data;
+    pe1Data2.color = "yellow";
+    
+    pe1Data3.label = b3data;
+    pe1Data3.text = textB3Data;
+    pe1Data3.color = "yellow";
+
+    pe1State0.label = b0state ;
+    pe1State0.text = textB0State;
+    pe1State0.color = "yellow";
+
+    pe1State1.label = b1state ;
+    pe1State1.text = textB1State;
+    pe1State1.color = "yellow";
+
+    pe1State2.label = b2state ;
+    pe1State2.text = textB2State;
+    pe1State2.color = "yellow";
+
+    pe1State3.label = b3state ;
+    pe1State3.text = textB3State;
+    pe1State3.color = "yellow";
+
+    /*=======================CPU 2========================*/
     cpuC0DataAddress0.label = c0Address;
     cpuC0DataAddress0.text = textC0Address;
     cpuC0DataAddress0.color = "yellow";
@@ -508,23 +657,105 @@ int main(int argc, char *argv[])
     cpuC3DataAddress3.label = c3Address;
     cpuC3DataAddress3.text = textC3Address;
     cpuC3DataAddress3.color = "yellow";
-    /*===============================================*/
-    pe0Data0.label = a0Data;
-    pe0Data0.text = textA0Data;
-    pe0Data0.color = "yellow";
 
-    pe0Data1.label = a1Data;
-    pe0Data1.text = textA1Data;
-    pe0Data1.color = "yellow";
+    pe2Data0.label = c0data;
+    pe2Data0.text = textC0Data;
+    pe2Data0.color = "yellow";
+
+    pe2Data1.label = c1data;
+    pe2Data1.text = textC1Data;
+    pe2Data1.color = "yellow";
     
-    pe0Data2.label = a2Data;
-    pe0Data2.text = textA2Data;
-    pe0Data2.color = "yellow";
+    pe2Data2.label = c2data;
+    pe2Data2.text = textC2Data;
+    pe2Data2.color = "yellow";
     
-    pe0Data3.label = a3Data;
-    pe0Data3.text = textA3Data;
-    pe0Data3.color = "yellow";
+    pe2Data3.label = c3data;
+    pe2Data3.text = textC3Data;
+    pe2Data3.color = "yellow";
+
+    pe2State0.label = c0state ;
+    pe2State0.text = textC0State;
+    pe2State0.color = "yellow";
+
+    pe2State1.label = c1state ;
+    pe2State1.text = textC1State;
+    pe2State1.color = "yellow";
+
+    pe2State2.label = c2state ;
+    pe2State2.text = textC2State;
+    pe2State2.color = "yellow";
+
+    pe2State3.label = c3state ;
+    pe2State3.text = textC3State;
+    pe2State3.color = "yellow";
+    /*=====================Memoria Principal==========================*/
+    MD0.label = data0;
+    MD0.text = memoryData0;
+    MD0.color = "yellow";
+
+    MD1.label = data1;
+    MD1.text = memoryData1;
+    MD1.color = "yellow";
+
+    MD2.label = data2;
+    MD2.text = memoryData2;
+    MD2.color = "yellow";
+
+    MD3.label = data3;
+    MD3.text = memoryData3;
+    MD3.color = "yellow";
+
+    MD4.label = data4;
+    MD4.text = memoryData4;
+    MD4.color = "yellow";
+
+    MD5.label = data5;
+    MD5.text = memoryData5;
+    MD5.color = "yellow";
+
+    MD6.label = data6;
+    MD6.text = memoryData6;
+    MD6.color = "yellow";
+
+    MD7.label = data7;
+    MD7.text = memoryData7;
+    MD7.color = "yellow";
+
     
+    MD8.label = data8;
+    MD8.text = memoryData8;
+    MD8.color = "yellow";
+
+    MD9.label = data9;
+    MD9.text = memoryData9;
+    MD9.color = "yellow";
+
+    MD10.label = data10;
+    MD10.text = memoryData10;
+    MD10.color = "yellow";
+
+    MD11.label = data11;
+    MD11.text = memoryData11;
+    MD11.color = "yellow";
+
+    MD12.label = data12;
+    MD12.text = memoryData12;
+    MD12.color = "yellow";
+
+    MD13.label = data13;
+    MD13.text = memoryData13;
+    MD13.color = "yellow";
+
+    MD14.label = data14;
+    MD14.text = memoryData14;
+    MD14.color = "yellow";
+
+    MD15.label = data15;
+    MD15.text = memoryData15;
+    MD15.color = "yellow";
+    
+
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
     guint timer_id2 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress2);
@@ -535,27 +766,64 @@ int main(int argc, char *argv[])
     guint timer_id7 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data2);
     guint timer_id8 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data3);
 
+    guint timer_id17 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0State0);
+    guint timer_id18 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0State1);
+    guint timer_id19 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0State2);
+    guint timer_id20 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0State3);
+
+
+
     guint timer_id9 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB0DataAddress0);
     guint timer_id10 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB1DataAddress1);
     guint timer_id11 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB2DataAddress2);
     guint timer_id12 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB3DataAddress3);
+
+    guint timer_id21 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1Data0);
+    guint timer_id22 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1Data1);
+    guint timer_id23 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1Data2);
+    guint timer_id24 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1Data3);
+
+    guint timer_id25 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1State0);
+    guint timer_id26 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1State1);
+    guint timer_id27 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1State2);
+    guint timer_id28 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe1State3);
+
+
 
     guint timer_id13 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC0DataAddress0);
     guint timer_id14 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC1DataAddress1);
     guint timer_id15 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC2DataAddress2);
     guint timer_id16 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC3DataAddress3);
     
-    
-    /*
-    guint timer_id5 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
-    guint timer_id6 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
-    guint timer_id7 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
+    guint timer_id29 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data0);
+    guint timer_id30 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data1);
+    guint timer_id31 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data2);
+    guint timer_id32 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2Data3);
 
-    guint timer_id8 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
-    guint timer_id9 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
-    guint timer_id10 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
-    guint timer_id11 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &data1);
-*/
+    guint timer_id33 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2State0);
+    guint timer_id34 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2State1);
+    guint timer_id35 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2State2);
+    guint timer_id36 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe2State3);
+
+
+    
+    guint timer_id37 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD0);
+    guint timer_id38 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD1);
+    guint timer_id39 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD2);
+    guint timer_id40 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD3);
+    guint timer_id41 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD4);
+    guint timer_id42 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD5);
+    guint timer_id43 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD6);
+    guint timer_id44 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD7);
+    guint timer_id45 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD8);
+    guint timer_id46 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD9);
+    guint timer_id47 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD10);
+    guint timer_id48 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD11);
+    guint timer_id49 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD12);
+    guint timer_id50 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD13);
+    guint timer_id51 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD14);
+    guint timer_id52 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD15);
+    
     
   
 
