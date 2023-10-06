@@ -264,7 +264,6 @@ gboolean changeLabelColorInt(GtkWidget *label, int text, const char *color)
 
     return TRUE;
 }
-
 int main(int argc, char *argv[])
 {
     
@@ -317,19 +316,11 @@ int main(int argc, char *argv[])
     //char textA0Data[4];
    // sprintf(textA0Data,"%d",my_bus.cpus[0].cache.blocks[0].data); 
     int *textA0Data = &(my_bus.cpus[0].cache.blocks[0].data);
+
     
-    char textA1Data[4];
-    sprintf(textA1Data,"%d",my_bus.cpus[0].cache.blocks[1].data);   
-    
-  
-    char textA2Data[4];
-    sprintf(textA2Data,"%d",my_bus.cpus[0].cache.blocks[2].data);   
-    
-    
-    char textA3Data[4];
-    sprintf(textA3Data,"%d",my_bus.cpus[0].cache.blocks[3].data);   
-    
-   
+   // char *textA1Data = (char)my_bus.cpus[0].cache.blocks[1].data;
+   // char *textA2Data = (char)my_bus.cpus[0].cache.blocks[2].data;
+   // char *textA3Data = (char)my_bus.cpus[0].cache.blocks[3].data;
 
     // char *textA0State = my_bus.cpus[0].cache.blocks[0].state;
     // char *textA1State = my_bus.cpus[0].cache.blocks[1].state;
@@ -343,7 +334,7 @@ int main(int argc, char *argv[])
 
     //char *textB0Data = (char *)(intptr_t)my_bus.cpus[1].cache.blocks[0].data;
     char textB0Data[4];
-    printf("The integer is: %d\n",(char)my_bus.cpus[0].cache.blocks[0].data,textB0Data);
+    printf("The integer is: %s\n",(char)my_bus.cpus[0].cache.blocks[0].data,textB0Data);
    
     char *textB1Data = (char)my_bus.cpus[1].cache.blocks[1].data;
     char *textB2Data = (char)my_bus.cpus[1].cache.blocks[2].data;
@@ -354,14 +345,20 @@ int main(int argc, char *argv[])
     char *textB2State = (char*)my_bus.cpus[1].cache.blocks[2].state;
     char *textB3State = (char*)my_bus.cpus[1].cache.blocks[3].state;
 
-
+    /*=================================PE2=========================================*/
+    char *textC0Address = my_bus.cpus[2].cache.blocks[0].address;
+    char *textC1Address = my_bus.cpus[2].cache.blocks[1].address;
+    char *textC2Address = my_bus.cpus[2].cache.blocks[2].address;
+    char *textC3Address = my_bus.cpus[2].cache.blocks[3].address;
 
 
 
     guint timer_id;
-    LabelData data1, cpuDataAddress0,cpuDataAddress1,cpuDataAddress2,cpuDataAddress3;
-    LabelData pe0Data1,pe0Data2,pe0Data3;
-    LabelDataInt pe0Data0;
+    LabelData data1,
+    cpuDataAddress0,cpuDataAddress1,cpuDataAddress2,cpuDataAddress3,
+    cpuB0DataAddress0,cpuB1DataAddress1,cpuB2DataAddress2,cpuB3DataAddress3,
+    cpuC0DataAddress0,cpuC1DataAddress1,cpuC2DataAddress2,cpuC3DataAddress3;
+    LabelData pe0Data0,pe0Data1,pe0Data2,pe0Data3;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
@@ -373,22 +370,27 @@ int main(int argc, char *argv[])
     a2state =GTK_WIDGET(gtk_builder_get_object(builder, "a2state"));
     a3state =GTK_WIDGET(gtk_builder_get_object(builder, "a3state"));
 
-
     a0Address =GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
     a1Address=GTK_WIDGET(gtk_builder_get_object(builder, "a1Address"));
     a2Address =GTK_WIDGET(gtk_builder_get_object(builder, "a2Address"));
     a3Address=GTK_WIDGET(gtk_builder_get_object(builder, "a3Address"));
+
+    b0Address =GTK_WIDGET(gtk_builder_get_object(builder, "b0Address"));
+    b1Address=GTK_WIDGET(gtk_builder_get_object(builder, "b1Address"));
+    b2Address =GTK_WIDGET(gtk_builder_get_object(builder, "b2Address"));
+    b3Address=GTK_WIDGET(gtk_builder_get_object(builder, "b3Address"));
+
+    c0Address =GTK_WIDGET(gtk_builder_get_object(builder, "c0Address"));
+    c1Address=GTK_WIDGET(gtk_builder_get_object(builder, "c1Address"));
+    c2Address =GTK_WIDGET(gtk_builder_get_object(builder, "c2Address"));
+    c3Address=GTK_WIDGET(gtk_builder_get_object(builder, "c3Address"));
 
     a0Data = GTK_WIDGET(gtk_builder_get_object(builder, "a0Data"));
     a1Data = GTK_WIDGET(gtk_builder_get_object(builder, "a1Data"));
     a2Data = GTK_WIDGET(gtk_builder_get_object(builder, "a2Data"));
     a3Data = GTK_WIDGET(gtk_builder_get_object(builder, "a3Data"));
 
-    b0Address =GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
-    b1Address=GTK_WIDGET(gtk_builder_get_object(builder, "a1Address"));
-    b2Address =GTK_WIDGET(gtk_builder_get_object(builder, "20Address"));
-    b3Address=GTK_WIDGET(gtk_builder_get_object(builder, "a3Address"));
-
+   
    
 
     addressPE2 = GTK_WIDGET(gtk_builder_get_object(builder, "addressPE2"));
@@ -396,17 +398,54 @@ int main(int argc, char *argv[])
     label1 = GTK_WIDGET(gtk_builder_get_object(builder, "nextPE2"));
 
     GtkCssProvider *cssProvider = gtk_css_provider_new();
-    GtkStyleContext *styleContext;
+    GtkStyleContext *styleContext,
+    *styleContext1,
+    *styleContext2,
+    *styleContext3,
+    *styleContext4,
+    *styleContext5,
+    *styleContext6,
+    *styleContext7,
+    *styleContext8,
+    *styleContext9;
     GError *error = NULL;
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(cssProvider), "style.css", &error);
 
-    styleContext = gtk_widget_get_style_context(label0);
-    gtk_style_context_add_class(styleContext, "mainLabel");
+    styleContext1 = gtk_widget_get_style_context(statePE1);
+    styleContext2 = gtk_widget_get_style_context(dataPE1);
+    styleContext3 = gtk_widget_get_style_context(addressPE1);
+    styleContext4 = gtk_widget_get_style_context(statePE2);
+    styleContext5 = gtk_widget_get_style_context(addressPE2);
+    styleContext6 = gtk_widget_get_style_context(dataPE2);
+    styleContext7 = gtk_widget_get_style_context(statePE3);
+    styleContext8 = gtk_widget_get_style_context(addressPE3);
+    styleContext9 = gtk_widget_get_style_context(dataPE3);
+    
+    gtk_style_context_add_class(styleContext1, "mainLabel");
+    gtk_style_context_add_class(styleContext2, "mainLabel");
+    gtk_style_context_add_class(styleContext3, "mainLabel");
+    gtk_style_context_add_class(styleContext4, "mainLabel");
+    gtk_style_context_add_class(styleContext5, "mainLabel");
+    gtk_style_context_add_class(styleContext6, "mainLabel");
+    gtk_style_context_add_class(styleContext7, "mainLabel");
+    gtk_style_context_add_class(styleContext8, "mainLabel");
+    gtk_style_context_add_class(styleContext9, "mainLabel");
+    
+    
 
-    styleContext = gtk_widget_get_style_context(addressPE2);
-    gtk_style_context_add_class(styleContext, "label1");
-    gtk_style_context_add_provider(styleContext, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+   // styleContext = gtk_widget_get_style_context(addressPE2);
+   // gtk_style_context_add_class(styleContext, "mainLabel");
 
+    gtk_style_context_add_provider(styleContext1, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext5, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext6, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext7, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext8, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext9, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
    
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -438,13 +477,45 @@ int main(int argc, char *argv[])
     cpuDataAddress3.label = a3Address;
     cpuDataAddress3.text = textA3Address;
     cpuDataAddress3.color = "yellow";
+    /*===============================================*/
+    cpuB0DataAddress0.label = b0Address;
+    cpuB0DataAddress0.text = textB0Address;
+    cpuB0DataAddress0.color = "yellow";
 
+    cpuB1DataAddress1.label = b1Address;
+    cpuB1DataAddress1.text = textB1Address;
+    cpuB1DataAddress1.color = "yellow";
+    
+    cpuB2DataAddress2.label = b2Address;
+    cpuB2DataAddress2.text = textB2Address;
+    cpuB2DataAddress2.color = "yellow";
+    
+    cpuB3DataAddress3.label = b3Address;
+    cpuB3DataAddress3.text = textB3Address;
+    cpuB3DataAddress3.color = "yellow";
+
+    /*===============================================*/
+    cpuC0DataAddress0.label = c0Address;
+    cpuC0DataAddress0.text = textC0Address;
+    cpuC0DataAddress0.color = "yellow";
+
+    cpuC1DataAddress1.label = c1Address;
+    cpuC1DataAddress1.text = textC1Address;
+    cpuC1DataAddress1.color = "yellow";
+    
+    cpuC2DataAddress2.label = c2Address;
+    cpuC2DataAddress2.text = textC2Address;
+    cpuC2DataAddress2.color = "yellow";
+    
+    cpuC3DataAddress3.label = c3Address;
+    cpuC3DataAddress3.text = textC3Address;
+    cpuC3DataAddress3.color = "yellow";
     /*===============================================*/
     pe0Data0.label = a0Data;
     pe0Data0.text = textA0Data;
     pe0Data0.color = "yellow";
 
-    pe0Data1.label = a1Data;
+    /*pe0Data1.label = a1Data;
     pe0Data1.text = textA1Data;
     pe0Data1.color = "yellow";
     
@@ -454,23 +525,27 @@ int main(int argc, char *argv[])
     
     pe0Data3.label = a3Data;
     pe0Data3.text = textA3Data;
-    pe0Data3.color = "yellow";
+    pe0Data3.color = "yellow";*/
     
-    //timer_id = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
-    
-  //  g_idle_add(changeLabelColorWrapper, &cpuDataAddress0);
-  //  g_idle_add(changeLabelColorWrapper, &cpuDataAddress1);
-   // g_idle_add(changeLabelColorWrapper, &cpuDataAddress2);
- //   g_idle_add(changeLabelColorWrapper, &cpuDataAddress3);
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
     guint timer_id2 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress2);
     guint timer_id3 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress3);
 
     guint timer_id5 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data0);
-    guint timer_id6 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data1);
+  /*  guint timer_id6 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data1);
     guint timer_id7 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data2);
-    guint timer_id8 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data3);
+    guint timer_id8 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data3);*/
+
+    guint timer_id9 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB0DataAddress0);
+    guint timer_id10 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB1DataAddress1);
+    guint timer_id11 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB2DataAddress2);
+    guint timer_id12 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB3DataAddress3);
+
+    guint timer_id13 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC0DataAddress0);
+    guint timer_id14 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC1DataAddress1);
+    guint timer_id15 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC2DataAddress2);
+    guint timer_id16 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuC3DataAddress3);
     
     
     /*
