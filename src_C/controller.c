@@ -5,13 +5,6 @@
 #include "../include/cpu.h"
 #include "../include/messages.h"
 
-struct Channel {
-    char op[10];
-    char address[10];
-    char action[10];
-};
-
-
 
  int main() {
      mqd_t mq ;

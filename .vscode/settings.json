@@ -1,12 +1,6 @@
 {
     "files.associations": {
-        "bus.h": "c",
-        "cache.h": "c",
-        "cpu.h": "c",
-        "messages.h": "c",
-        "array": "c",
-        "string": "c",
-        "string_view": "c",
-        "ratio": "c"
+        "memory.h": "c",
+        "cpu.h": "c"
     }
 }

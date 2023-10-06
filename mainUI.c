@@ -1,17 +1,19 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkx.h>
 
+#include "include/messages.h"
 #include "include/memory.h"
 #include "include/cache.h"
 #include "include/random_instruction.h"
 #include "include/cpu.h"
-#include "include/messages.h"
 #include "include/bus.h"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
 #include <mqueue.h>
 
 
@@ -178,7 +180,7 @@ typedef struct
 typedef struct
 {
     GtkWidget *label;
-    const int *text;
+    int *text;
     const char *color;
 } LabelDataInt;
 
@@ -225,7 +227,7 @@ gboolean changeLabelColorWrapper(gpointer user_data)
 gboolean changeLabelColorWrapperInt(gpointer user_data)
 {
     LabelData *data = (LabelData *)user_data;
-    return changeLabelColorInt(data->label, data->text, data->color);
+    return changeLabelColorInt(data->label, *(data->text), data->color);
 }
 
 gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
@@ -246,16 +248,19 @@ gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
 
 gboolean changeLabelColorInt(GtkWidget *label, int text, const char *color)
 {
+    gchar *display;
+    display = g_strdup_printf("%d", text);
     static gboolean colorFlag = FALSE;
     counter = counter - 1;
     colorFlag = !colorFlag;
+    
 
     const char *backgroundColor = colorFlag ? color : color;
-    const char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
-
-    gtk_label_set_markup(GTK_LABEL(label), markup);
-
-    g_free((char *)markup);
+    //const char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
+    //char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
+    //gtk_label_set_markup(GTK_LABEL(label), markup);
+    gtk_label_set_text(GTK_LABEL(label), display);
+    g_free(display);
 
     return TRUE;
 }
@@ -292,9 +297,9 @@ int main(int argc, char *argv[])
         my_bus.cpus[i].id = i;
         initializeCache(&my_bus.cpus[i].cache);
 
-        my_bus.cpus[i].stats.INV= 0;
-        my_bus.cpus[i].stats.READ_REQ_RESP =0;
-        my_bus.cpus[i].stats.WRITE_REQ_RESP= 0;
+        my_bus.cpus[i].stats.INV = 0;
+        my_bus.cpus[i].stats.READ_REQ_RESP = 0;
+        my_bus.cpus[i].stats.WRITE_REQ_RESP = 0;
         
 
         cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
@@ -311,7 +316,7 @@ int main(int argc, char *argv[])
 
     //char textA0Data[4];
    // sprintf(textA0Data,"%d",my_bus.cpus[0].cache.blocks[0].data); 
-    int textA0Data =my_bus.cpus[0].cache.blocks[0].data;
+    int *textA0Data = &(my_bus.cpus[0].cache.blocks[0].data);
     
     char textA1Data[4];
     sprintf(textA1Data,"%d",my_bus.cpus[0].cache.blocks[1].data);   
@@ -326,10 +331,10 @@ int main(int argc, char *argv[])
     
    
 
-    char *textA0State = (char*)my_bus.cpus[0].cache.blocks[0].state;
-    char *textA1State = (char*)my_bus.cpus[0].cache.blocks[1].state;
-    char *textA2State = (char*)my_bus.cpus[0].cache.blocks[2].state;
-    char *textA3State = (char*)my_bus.cpus[0].cache.blocks[3].state;
+    // char *textA0State = my_bus.cpus[0].cache.blocks[0].state;
+    // char *textA1State = my_bus.cpus[0].cache.blocks[1].state;
+    // char *textA2State = my_bus.cpus[0].cache.blocks[2].state;
+    // char *textA3State = my_bus.cpus[0].cache.blocks[3].state;
     /*==================================PE1=======================================*/
     char *textB0Address = my_bus.cpus[1].cache.blocks[0].address;
     char *textB1Address = my_bus.cpus[1].cache.blocks[1].address;
