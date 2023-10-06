@@ -29,10 +29,10 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
     //    }
     
 
-    message.access = READMISS;
+    message.access = WRITEMISS;
     snprintf(message.address, sizeof(message.address), "0xD");
-    message.block_id = 0;
-    message.id = 0;
+    message.block_id = 3;
+    message.id = 1;
     message.value = 34;
     bus->channel = message;
 
@@ -287,7 +287,7 @@ int main() {
     initializeCache(&my_bus.cpus[1].cache);
 
     my_bus.cpus[0].cache.blocks[0].data = 4;
-    my_bus.cpus[0].cache.blocks[0].state = SHARED;
+    my_bus.cpus[0].cache.blocks[0].state = MODIFIED;
     snprintf(my_bus.cpus[0].cache.blocks[0].address, sizeof(my_bus.cpus[0].cache.blocks[0].address), "0xD");
     
     my_bus.cpus[1].cache.blocks[3].data = 6;
