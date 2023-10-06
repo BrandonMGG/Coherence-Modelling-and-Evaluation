@@ -10,7 +10,8 @@ struct bus {
 
 typedef enum {
     READMISS,
-    WRITEMISS
+    WRITEMISS,
+    INCREMENT
 } AccessType;
 
 
@@ -46,6 +47,8 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus, int prot);
     
     */
 void process_writemiss(int cpu_id, int block_index, struct bus *bus, int state);
+
+void process_increment(int cpu_id, int block_index, struct bus *bus, int prot);
 
 void perform_wb(char * dirty_address, int dirty_data, struct bus *bus);
 

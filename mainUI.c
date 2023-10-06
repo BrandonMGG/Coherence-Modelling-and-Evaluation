@@ -572,7 +572,7 @@ int main(int argc, char *argv[])
     pe0Data2.label = a2Data;
     pe0Data2.text = textA2Data;
     pe0Data2.color = "yellow";
-    
+     
     pe0Data3.label = a3Data;
     pe0Data3.text = textA3Data;
     pe0Data3.color = "yellow";

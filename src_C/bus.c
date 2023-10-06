@@ -12,7 +12,7 @@
 Cache get_core_cache(int cpu_id, struct bus *bus){
   return bus->cpus[cpu_id].cache;
 }
-
+   
 void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
   // SIMULATE PROCESS DELAY
   //message = bus->channel;
@@ -52,6 +52,10 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
     else if (access == READMISS)
     {
       process_readmiss(core_id, block_id, bus, prot);
+
+    }else if (access == INCREMENT)
+    {
+      process_increment(core_id, block_id, bus, prot);
     }
     
     else printf("Access Error - %d not found", access);
@@ -90,15 +94,23 @@ void process_readmiss(int cpu_id, int block_index, struct bus *bus ,int prot){
   if( prot == MOESI){
     // Now ask check if other cores has the block
     owned_data = seek_owned(bus->channel.address,cpu_id,bus);
-    printf("*****************************************************************************************");
+    printf("*****************************************************************************************\n");
   }
   else{
     owned_data = -1; 
   }
   
-  
+  if( strcmp(bus->cpus[cpu_id].cache.blocks[block_index].address, bus->channel.address) == 0){
+    if(bus->cpus[cpu_id].cache.blocks[block_index].state == INVALID){
+      int mem_data = get_data_from_memory(&bus->main_memory,bus->channel.address);
+      bus->cpus[cpu_id].cache.blocks[block_index].state = EXCLUSIVE;
+      bus->cpus[cpu_id].cache.blocks[block_index].data = mem_data;
+      snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
+      printf("Readmiss Trae de memoria Address: %s\n", bus->channel.address);
+    }
+  }
   // If sponsors state is O or M then set block state to S
-  if(owned_data != -1){
+  else if(owned_data != -1){
     bus->cpus[cpu_id].cache.blocks[block_index].state = SHARED;
     bus->cpus[cpu_id].cache.blocks[block_index].data = owned_data; 
     snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address), "%s",bus->channel.address);
@@ -138,6 +150,70 @@ void process_writemiss(int cpu_id, int block_index, struct bus *bus, int value){
   bus->cpus[cpu_id].stats.INV++;
   printf("Writemiss Invalidate  Address: %s\n",bus->channel.address);
 }
+
+
+void process_increment(int cpu_id, int block_index, struct bus *bus, int prot){
+  //If I do read and if I am writing on M or O I must do WB
+  if(bus->cpus[cpu_id].cache.blocks[block_index].state == MODIFIED || bus->cpus[cpu_id].cache.blocks[block_index].state == OWNED){
+    perform_wb(bus->channel.address,bus->cpus[cpu_id].cache.blocks[block_index].data, bus);
+    //printf("Address : %s \n",bus->cpus[cpu_id].cache.blocks[block_index].address);
+    //printf("cpu : %d , block index: %d ,state : %d \n", cpu_id, block_index , bus->cpus[cpu_id].cache.blocks[block_index].state);
+    printf("Readmiss Modified o Owned  Address: %s \n", bus->channel.address);
+  }
+  int owned_data = 0;
+  if( prot == MOESI){
+    // Now ask check if other cores has the block
+    owned_data = seek_owned(bus->channel.address,cpu_id,bus);
+    printf("*****************************************************************************************\n");
+  }
+  else{
+    owned_data = -1; 
+  }
+  if( strcmp(bus->cpus[cpu_id].cache.blocks[block_index].address, bus->channel.address) == 0){
+    if(bus->cpus[cpu_id].cache.blocks[block_index].state == INVALID){
+      int mem_data = get_data_from_memory(&bus->main_memory,bus->channel.address);
+      bus->cpus[cpu_id].cache.blocks[block_index].state = EXCLUSIVE;
+      bus->cpus[cpu_id].cache.blocks[block_index].data = mem_data+1;
+      snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
+      printf("Readmiss Trae de memoria Address: %s\n", bus->channel.address);
+    }
+  }
+  
+  // If sponsors state is O or M then set block state to S
+  else if(owned_data != -1){
+    bus->cpus[cpu_id].cache.blocks[block_index].state = MODIFIED;
+    bus->cpus[cpu_id].cache.blocks[block_index].data = owned_data+1;
+    snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
+    seek_invalidate(bus->channel.address,cpu_id,bus);
+    
+    printf("Invrement Invalidate  Address: %s\n",bus->channel.address);
+    
+  //If no sponsors
+  }else {
+    // Check if address is E or S in another node
+    //and save that value to the local cache in S state
+    int shared_data = seek_shared(bus->channel.address,cpu_id,bus);
+    if(shared_data != -1){
+      bus->cpus[cpu_id].cache.blocks[block_index].state = MODIFIED;
+      bus->cpus[cpu_id].cache.blocks[block_index].data = shared_data+1;
+      snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
+      seek_invalidate(bus->channel.address,cpu_id,bus);
+      
+      printf("Invrement Invalidate  Address: %s\n",bus->channel.address);
+    }else{
+      //Then no one have the value, read from memory then set block state to E
+      int mem_data = get_data_from_memory(&bus->main_memory,bus->channel.address);
+      bus->cpus[cpu_id].cache.blocks[block_index].state = MODIFIED;
+      bus->cpus[cpu_id].cache.blocks[block_index].data = mem_data+1;
+      snprintf(bus->cpus[cpu_id].cache.blocks[block_index].address, sizeof(bus->cpus[cpu_id].cache.blocks[block_index].address),"%s", bus->channel.address);
+      seek_invalidate(bus->channel.address,cpu_id,bus);
+      bus->cpus[cpu_id].stats.INV++;
+    }
+  }
+  bus->cpus[cpu_id].stats.INV++;
+  
+}
+
 
 void perform_wb(char * dirty_address, int dirty_data, struct bus *bus){
   //Needs delay to simulate latency

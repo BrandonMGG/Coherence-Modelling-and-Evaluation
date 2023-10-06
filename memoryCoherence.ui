@@ -944,7 +944,7 @@
               <object class="GtkLabel" id="address1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">1</property>
+                <property name="label" translatable="yes">0x1</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -967,7 +967,7 @@
               <object class="GtkLabel" id="address2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">2</property>
+                <property name="label" translatable="yes">0x2</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1014,7 +1014,7 @@
               <object class="GtkLabel" id="address3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">3</property>
+                <property name="label" translatable="yes">0x3</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1060,7 +1060,7 @@
               <object class="GtkLabel" id="address6">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">6</property>
+                <property name="label" translatable="yes">0x6</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1071,7 +1071,7 @@
               <object class="GtkLabel" id="address5">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">5</property>
+                <property name="label" translatable="yes">0x5</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1082,7 +1082,7 @@
               <object class="GtkLabel" id="address4">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">4</property>
+                <property name="label" translatable="yes">0x4</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1095,7 +1095,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">7</property>
+                <property name="label" translatable="yes">0x7</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1106,7 +1106,7 @@
               <object class="GtkLabel" id="address0">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">0</property>
+                <property name="label" translatable="yes">0x0</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1119,7 +1119,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">8</property>
+                <property name="label" translatable="yes">0x8</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1132,7 +1132,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">9</property>
+                <property name="label" translatable="yes">0x9</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1145,7 +1145,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">A</property>
+                <property name="label" translatable="yes">0xA</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1158,7 +1158,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">C</property>
+                <property name="label" translatable="yes">0xC</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1171,7 +1171,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">B</property>
+                <property name="label" translatable="yes">0xB</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1184,7 +1184,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">D</property>
+                <property name="label" translatable="yes">0xD</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1197,7 +1197,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">E</property>
+                <property name="label" translatable="yes">0xE</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1210,7 +1210,7 @@
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="label" translatable="yes">F</property>
+                <property name="label" translatable="yes">0xF</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
