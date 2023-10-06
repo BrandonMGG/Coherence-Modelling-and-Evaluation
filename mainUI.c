@@ -227,7 +227,7 @@ gboolean changeLabelColorWrapper(gpointer user_data)
 gboolean changeLabelColorWrapperInt(gpointer user_data)
 {
     LabelData *data = (LabelData *)user_data;
-    return changeLabelColorInt(data->label, *(data->text), data->color);
+    return changeLabelColorInt(data->label, (unsigned int) *(data->text), data->color);
 }
 
 gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
@@ -246,7 +246,7 @@ gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
     return TRUE;
 }
 
-gboolean changeLabelColorInt(GtkWidget *label, int text, const char *color)
+gboolean changeLabelColorInt(GtkWidget *label,unsigned int text, const char *color)
 {
     gchar *display;
     display = g_strdup_printf("%d", text);
@@ -255,7 +255,7 @@ gboolean changeLabelColorInt(GtkWidget *label, int text, const char *color)
     colorFlag = !colorFlag;
     
 
-    const char *backgroundColor = colorFlag ? color : color;
+    //const char *backgroundColor = colorFlag ? color : color;
     //const char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
     //char *markup = g_markup_printf_escaped("<span background=\"%s\">%d</span>", backgroundColor, text);
     //gtk_label_set_markup(GTK_LABEL(label), markup);
@@ -315,12 +315,10 @@ int main(int argc, char *argv[])
 
     //char textA0Data[4];
    // sprintf(textA0Data,"%d",my_bus.cpus[0].cache.blocks[0].data); 
-    int *textA0Data = &(my_bus.cpus[0].cache.blocks[0].data);
-
-    
-   // char *textA1Data = (char)my_bus.cpus[0].cache.blocks[1].data;
-   // char *textA2Data = (char)my_bus.cpus[0].cache.blocks[2].data;
-   // char *textA3Data = (char)my_bus.cpus[0].cache.blocks[3].data;
+    int *textA0Data = &(my_bus.cpus[0].cache.blocks[0].data); 
+    int *textA1Data = &(my_bus.cpus[0].cache.blocks[1].data);
+    int *textA2Data = &(my_bus.cpus[0].cache.blocks[2].data);
+    int *textA3Data = &(my_bus.cpus[0].cache.blocks[3].data);
 
     // char *textA0State = my_bus.cpus[0].cache.blocks[0].state;
     // char *textA1State = my_bus.cpus[0].cache.blocks[1].state;
@@ -334,7 +332,7 @@ int main(int argc, char *argv[])
 
     //char *textB0Data = (char *)(intptr_t)my_bus.cpus[1].cache.blocks[0].data;
     char textB0Data[4];
-    printf("The integer is: %s\n",(char)my_bus.cpus[0].cache.blocks[0].data,textB0Data);
+    printf("The integer is: %d\n",my_bus.cpus[0].cache.blocks[0].data);
    
     char *textB1Data = (char)my_bus.cpus[1].cache.blocks[1].data;
     char *textB2Data = (char)my_bus.cpus[1].cache.blocks[2].data;
@@ -358,7 +356,7 @@ int main(int argc, char *argv[])
     cpuDataAddress0,cpuDataAddress1,cpuDataAddress2,cpuDataAddress3,
     cpuB0DataAddress0,cpuB1DataAddress1,cpuB2DataAddress2,cpuB3DataAddress3,
     cpuC0DataAddress0,cpuC1DataAddress1,cpuC2DataAddress2,cpuC3DataAddress3;
-    LabelData pe0Data0,pe0Data1,pe0Data2,pe0Data3;
+    LabelDataInt pe0Data0,pe0Data1,pe0Data2,pe0Data3;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
@@ -515,7 +513,7 @@ int main(int argc, char *argv[])
     pe0Data0.text = textA0Data;
     pe0Data0.color = "yellow";
 
-    /*pe0Data1.label = a1Data;
+    pe0Data1.label = a1Data;
     pe0Data1.text = textA1Data;
     pe0Data1.color = "yellow";
     
@@ -525,7 +523,7 @@ int main(int argc, char *argv[])
     
     pe0Data3.label = a3Data;
     pe0Data3.text = textA3Data;
-    pe0Data3.color = "yellow";*/
+    pe0Data3.color = "yellow";
     
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
@@ -533,9 +531,9 @@ int main(int argc, char *argv[])
     guint timer_id3 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress3);
 
     guint timer_id5 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data0);
-  /*  guint timer_id6 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data1);
-    guint timer_id7 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data2);
-    guint timer_id8 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &pe0Data3);*/
+    guint timer_id6 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data1);
+    guint timer_id7 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data2);
+    guint timer_id8 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &pe0Data3);
 
     guint timer_id9 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB0DataAddress0);
     guint timer_id10 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuB1DataAddress1);

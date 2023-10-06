@@ -65,7 +65,9 @@ void process_tasks(struct bus *bus, mqd_t mq, int busIsActive, int prot){
     for(int i =0; i < CACHE_SIZE ; i++){
       printf("Cache 1 Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[1].cache.blocks[i].tag ,bus->cpus[1].cache.blocks[i].address ,bus->cpus[1].cache.blocks[i].state ,bus->cpus[1].cache.blocks[i].data);
     }
-
+    for(int i =0; i < CACHE_SIZE ; i++){
+      printf("Cache 2 Tag -> %d Address -> %s State -> %d Value -> %d \n",bus->cpus[2].cache.blocks[i].tag ,bus->cpus[2].cache.blocks[i].address ,bus->cpus[2].cache.blocks[i].state ,bus->cpus[2].cache.blocks[i].data);
+    }
     
 
   }

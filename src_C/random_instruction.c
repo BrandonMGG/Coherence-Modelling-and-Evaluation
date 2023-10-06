@@ -42,7 +42,7 @@ int get_random_data() {
     char hexString[10]; // Ajusta el tamaño según tus necesidades
 
     // Genera un valor entero aleatorio (por ejemplo, entre 0 y 255)
-    value = rand() % 256;
+    value = rand() % 127;
 
     // Convierte el valor entero a una cadena de caracteres hexadecimal
     sprintf(hexString, "%X", value);
