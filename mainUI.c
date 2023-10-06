@@ -27,7 +27,7 @@ GtkWidget *window, *grid, *start,
     *nextPE2,
     *currentPE2,
     *cpu2Grid1,
-    *dataPE2,
+    *dataPE2,*stateNomenclature, *mainMemory,
     *relleno2,
     *b0,
     *b1,
@@ -527,6 +527,11 @@ int main(int argc, char *argv[])
     currentPE2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE2"));
     currentPE3 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3"));
 
+
+    stateNomenclature = GTK_WIDGET(gtk_builder_get_object(builder, "stateNomenclature"));
+    mainMemory = GTK_WIDGET(gtk_builder_get_object(builder, "mainMemory"));
+    
+
     b0 = GTK_WIDGET(gtk_builder_get_object(builder, "b0"));
     b1 = GTK_WIDGET(gtk_builder_get_object(builder, "b1"));
     b2 = GTK_WIDGET(gtk_builder_get_object(builder, "b2"));
@@ -562,7 +567,20 @@ int main(int argc, char *argv[])
         *styleContext12,
         *styleContext13,
         *styleContext14,
-        *styleContext15;
+        *styleContext15,
+        *styleContext16,
+        *styleContext17,
+        *styleContext18,
+        *styleContext19,
+        *styleContext20,
+        *styleContext21,
+        *styleContext22,
+        *styleContext23,
+        *styleContext24,
+        *styleContext25,
+        *styleContext26,
+        *styleContext27,
+        *styleContext28;
 
     GError *error = NULL;
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(cssProvider), "style.css", &error);
@@ -582,6 +600,12 @@ int main(int argc, char *argv[])
     styleContext13 = gtk_widget_get_style_context(b1);
     styleContext14 = gtk_widget_get_style_context(b2);
     styleContext15 = gtk_widget_get_style_context(b3);
+    
+
+    styleContext16 = gtk_widget_get_style_context(stateNomenclature);
+    styleContext17 = gtk_widget_get_style_context(mainMemory);
+   // styleContext18 = gtk_widget_get_style_context(start);
+    
 
     gtk_style_context_add_class(styleContext1, "mainLabel");
     gtk_style_context_add_class(styleContext2, "mainLabel");
@@ -599,6 +623,13 @@ int main(int argc, char *argv[])
     gtk_style_context_add_class(styleContext14, "mainLabel");
     gtk_style_context_add_class(styleContext15, "mainLabel");
 
+    gtk_style_context_add_class(styleContext16, "principalLabel");
+    gtk_style_context_add_class(styleContext17, "principalLabel");
+   // gtk_style_context_add_class(styleContext18, "button");
+
+    
+   
+
     gtk_style_context_add_provider(styleContext1, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -614,6 +645,12 @@ int main(int argc, char *argv[])
     gtk_style_context_add_provider(styleContext13, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext14, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext15, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    gtk_style_context_add_provider(styleContext16, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext17, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
+   // gtk_style_context_add_provider(styleContext18, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
     /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -965,7 +1002,7 @@ int main(int argc, char *argv[])
     {
         pthread_join(cpu_threads[i], NULL);
     }
-
+    pthread_join(bus_thread,NULL);
     return 0;
 } // gcc -o mainUI mainUI.c `pkg-config --cflags --libs gtk+-3.0`
 // ./mainUI
