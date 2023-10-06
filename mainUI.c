@@ -170,7 +170,7 @@ GtkWidget *window, *grid, *start,
 GtkWidget *label0, *label1;
 GtkWidget *event_box;
 GtkWidget *box;
-int counter = 100;
+
 
 struct cpu_thread_args
 {
@@ -199,6 +199,16 @@ typedef struct
     int *text;
     const char *color;
 } LabelDataInt;
+
+
+
+int counter = 100;
+struct bus_thread_args bus_t_args;
+struct cpu_thread_args cpu_thread_args_array[N_CPU];
+
+pthread_t cpu_threads[N_CPU];
+pthread_t bus_t;
+
 
 void *cpu_thread(void *args)
 {
@@ -286,7 +296,15 @@ gboolean changeLabelColorInt(GtkWidget *label, unsigned int text, const char *co
 
 void button_clicked(GtkWidget *widget, gpointer data)
 {
-    startProgramCondition=1;
+    startProgramCondition = 1;
+
+    // Crea e inicia los hilos CPU y el hilo de bus.
+    for (int i = 0; i < N_CPU; i++)
+    {
+        pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
+    }
+    pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+
     g_print("Button clicked!\n");
 }
 
@@ -297,15 +315,14 @@ int main(int argc, char *argv[])
 
     struct memory main_memory;
     struct bus my_bus;
-    pthread_t cpu_threads[N_CPU];
-    pthread_t bus_t;
+    
     mqd_t mq;
 
     // Bus ops testing
     memory_init(&main_memory);
     my_bus.main_memory = main_memory;
 
-    struct bus_thread_args bus_t_args;
+    
 
     mq = create_message_queue();
     bus_t_args.bus = &my_bus; // Estructura bus
@@ -314,10 +331,8 @@ int main(int argc, char *argv[])
     bus_t_args.protocolo = MESI;
     bus_t_args.mq = mq;
 
-    struct cpu_thread_args cpu_thread_args_array[N_CPU];
+    
     // Inicializar y lanzar las threads de CPU
-    if (startProgramCondition==0)
-    {
         for (int i = 0; i < N_CPU; i++)
         {
             my_bus.cpus[i].id = i;
@@ -329,10 +344,11 @@ int main(int argc, char *argv[])
 
             cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
             cpu_thread_args_array[i].mq = mq;
-            pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
+            //pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
         }
-        pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
-    }
+        //pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+
+    g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
 
     // char *currentPE1 = my_bus.;
 
@@ -1003,6 +1019,7 @@ int main(int argc, char *argv[])
         pthread_join(cpu_threads[i], NULL);
     }
     pthread_join(bus_thread,NULL);
+    
     return 0;
 } // gcc -o mainUI mainUI.c `pkg-config --cflags --libs gtk+-3.0`
 // ./mainUI
