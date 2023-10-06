@@ -3,7 +3,7 @@
 void memory_init(struct memory *memory) {
   for (int i = 0; i < MEM_SIZE; i++) {
     sprintf(memory->entries[i].address, "0x%01X", i);
-    memory->entries[i].data = rand() % 127;;
+    memory->entries[i].data = rand() % 127;
   }
 }
 

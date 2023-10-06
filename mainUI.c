@@ -156,7 +156,16 @@ GtkWidget *window, *grid, *start,
     *data12,
     *data13,
     *data14,
-    *data15;
+    *data15,
+    *currentPE3data0,
+    *currentPE3data1,
+    *currentPE3data2,
+    *currentPE1data0,
+    *currentPE1data1,
+    *currentPE1data2,
+    *currentPE2data0,
+    *currentPE2data1,
+    *currentPE2data2;
 
 GtkWidget *label0, *label1;
 GtkWidget *event_box;
@@ -205,7 +214,7 @@ void *cpu_thread(void *args)
         cpu->instruction = new_instruction;
 
         printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
-
+        printf("%s , %s , %d \n", new_instruction.op,new_instruction.address,new_instruction.data);
         execute_instruction(cpu, &new_instruction, mq);
 
         printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
@@ -328,6 +337,21 @@ int main(int argc, char *argv[])
     // char *currentPE1 = my_bus.;
 
     // Join threads and its args data structures
+
+
+
+    char *currentPE_0_op = my_bus.cpus[0].instruction.op; 
+    char *currentPE_0_add = my_bus.cpus[0].instruction.address; 
+    int *currentPE_0_dat = &(my_bus.cpus[0].instruction.data); 
+
+    char *currentPE_1_op = my_bus.cpus[1].instruction.op; 
+    char *currentPE_1_add = my_bus.cpus[1].instruction.address; 
+    int *currentPE_1_dat = &(my_bus.cpus[1].instruction.data); 
+
+    char *currentPE_2_op = my_bus.cpus[2].instruction.op; 
+    char *currentPE_2_add = my_bus.cpus[2].instruction.address; 
+    int *currentPE_2_dat = &(my_bus.cpus[2].instruction.data); 
+
     /*==================================PE0=======================================*/
     char *textA0Address = my_bus.cpus[0].cache.blocks[0].address;
     char *textA1Address = my_bus.cpus[0].cache.blocks[1].address;
@@ -414,6 +438,8 @@ int main(int argc, char *argv[])
     LabelDataInt pe2Data0, pe2Data1, pe2Data2, pe2Data3;
     LabelDataInt pe2State0, pe2State1, pe2State2, pe2State3;
     LabelDataInt MD0, MD1, MD2, MD3, MD4, MD5, MD6, MD7, MD8, MD9, MD10, MD11, MD12, MD13, MD14, MD15;
+    LabelData curr_0_add,curr_1_add,curr_2_add, curr_0_op,curr_1_op,curr_2_op;
+    LabelDataInt curr_0_dat,curr_1_dat,curr_2_dat;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
@@ -508,6 +534,17 @@ int main(int argc, char *argv[])
 
     label0 = GTK_WIDGET(gtk_builder_get_object(builder, "pe2"));
     label1 = GTK_WIDGET(gtk_builder_get_object(builder, "nextPE2"));
+
+
+    currentPE1data0 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE1data0"));
+    currentPE1data1 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE1data1"));
+    currentPE1data2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE1data2"));
+    currentPE2data0 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE2data0"));
+    currentPE2data1 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE2data1"));
+    currentPE2data2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE2data2"));
+    currentPE3data0 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data0"));
+    currentPE3data1 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data1"));
+    currentPE3data2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data2"));
 
     GtkCssProvider *cssProvider = gtk_css_provider_new();
     GtkStyleContext *styleContext,
@@ -808,6 +845,45 @@ int main(int argc, char *argv[])
     MD15.text = memoryData15;
     MD15.color = "yellow";
 
+    /*=====================Instrucciones==========================*/
+    curr_0_add.label = currentPE1data1;
+    curr_0_add.text = currentPE_0_add;
+    curr_0_add.color = "white";
+
+    curr_1_add.label = currentPE2data1;
+    curr_1_add.text = currentPE_1_add;
+    curr_1_add.color = "white";
+
+    curr_2_add.label = currentPE3data1;
+    curr_2_add.text = currentPE_2_add;
+    curr_2_add.color = "white";
+
+    curr_0_op.label = currentPE1data0;
+    curr_0_op.text = currentPE_0_op;
+    curr_0_op.color = "white";
+
+    curr_1_op.label = currentPE2data0;
+    curr_1_op.text = currentPE_1_op;
+    curr_1_op.color = "white";
+
+    curr_2_op.label = currentPE3data0;
+    curr_2_op.text = currentPE_2_op;
+    curr_2_op.color = "white";
+
+    curr_0_dat.label = currentPE1data2;
+    curr_0_dat.text = currentPE_0_dat;
+    curr_0_dat.color = "white";
+
+    curr_1_dat.label = currentPE2data2;
+    curr_1_dat.text = currentPE_1_dat;
+    curr_1_dat.color = "white";
+
+    curr_2_dat.label = currentPE3data2;
+    curr_2_dat.text = currentPE_2_dat;
+    curr_2_dat.color = "white";
+
+
+
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
     guint timer_id2 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress2);
@@ -869,6 +945,16 @@ int main(int argc, char *argv[])
     guint timer_id50 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD13);
     guint timer_id51 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD14);
     guint timer_id52 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &MD15);
+
+    guint timer_id53 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &curr_0_add);
+    guint timer_id54 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &curr_1_add);
+    guint timer_id55 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &curr_2_add);
+    guint timer_id56 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &curr_0_op);
+    guint timer_id57 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &curr_1_op);
+    guint timer_id58 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &curr_2_op);
+    guint timer_id59 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_0_dat);
+    guint timer_id60 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_1_dat);
+    guint timer_id61 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_2_dat);
 
     // NO PONER NADA POR ABAJO DE ACA
     gtk_widget_show_all(window);
