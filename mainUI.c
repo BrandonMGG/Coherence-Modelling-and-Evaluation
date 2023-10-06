@@ -27,7 +27,7 @@ GtkWidget *window, *grid, *start,
     *nextPE2,
     *currentPE2,
     *cpu2Grid1,
-    *dataPE2,
+    *dataPE2,*stateNomenclature, *mainMemory,
     *relleno2,
     *b0,
     *b1,
@@ -170,7 +170,7 @@ GtkWidget *window, *grid, *start,
 GtkWidget *label0, *label1;
 GtkWidget *event_box;
 GtkWidget *box;
-int counter = 100;
+
 
 struct cpu_thread_args
 {
@@ -199,6 +199,16 @@ typedef struct
     int *text;
     const char *color;
 } LabelDataInt;
+
+
+
+int counter = 100;
+struct bus_thread_args bus_t_args;
+struct cpu_thread_args cpu_thread_args_array[N_CPU];
+
+pthread_t cpu_threads[N_CPU];
+pthread_t bus_t;
+
 
 void *cpu_thread(void *args)
 {
@@ -286,7 +296,15 @@ gboolean changeLabelColorInt(GtkWidget *label, unsigned int text, const char *co
 
 void button_clicked(GtkWidget *widget, gpointer data)
 {
-    startProgramCondition=1;
+    startProgramCondition = 1;
+
+    // Crea e inicia los hilos CPU y el hilo de bus.
+    for (int i = 0; i < N_CPU; i++)
+    {
+        pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
+    }
+    pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+
     g_print("Button clicked!\n");
 }
 
@@ -297,15 +315,14 @@ int main(int argc, char *argv[])
 
     struct memory main_memory;
     struct bus my_bus;
-    pthread_t cpu_threads[N_CPU];
-    pthread_t bus_t;
+    
     mqd_t mq;
 
     // Bus ops testing
     memory_init(&main_memory);
     my_bus.main_memory = main_memory;
 
-    struct bus_thread_args bus_t_args;
+    
 
     mq = create_message_queue();
     bus_t_args.bus = &my_bus; // Estructura bus
@@ -314,10 +331,8 @@ int main(int argc, char *argv[])
     bus_t_args.protocolo = MESI;
     bus_t_args.mq = mq;
 
-    struct cpu_thread_args cpu_thread_args_array[N_CPU];
+    
     // Inicializar y lanzar las threads de CPU
-    if (startProgramCondition==0)
-    {
         for (int i = 0; i < N_CPU; i++)
         {
             my_bus.cpus[i].id = i;
@@ -329,10 +344,11 @@ int main(int argc, char *argv[])
 
             cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
             cpu_thread_args_array[i].mq = mq;
-            pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
+            //pthread_create(&cpu_threads[i], NULL, cpu_thread, (void *)&cpu_thread_args_array[i]);
         }
-        pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
-    }
+        //pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+
+    g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
 
     // char *currentPE1 = my_bus.;
 
@@ -527,6 +543,11 @@ int main(int argc, char *argv[])
     currentPE2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE2"));
     currentPE3 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3"));
 
+
+    stateNomenclature = GTK_WIDGET(gtk_builder_get_object(builder, "stateNomenclature"));
+    mainMemory = GTK_WIDGET(gtk_builder_get_object(builder, "mainMemory"));
+    
+
     b0 = GTK_WIDGET(gtk_builder_get_object(builder, "b0"));
     b1 = GTK_WIDGET(gtk_builder_get_object(builder, "b1"));
     b2 = GTK_WIDGET(gtk_builder_get_object(builder, "b2"));
@@ -562,7 +583,20 @@ int main(int argc, char *argv[])
         *styleContext12,
         *styleContext13,
         *styleContext14,
-        *styleContext15;
+        *styleContext15,
+        *styleContext16,
+        *styleContext17,
+        *styleContext18,
+        *styleContext19,
+        *styleContext20,
+        *styleContext21,
+        *styleContext22,
+        *styleContext23,
+        *styleContext24,
+        *styleContext25,
+        *styleContext26,
+        *styleContext27,
+        *styleContext28;
 
     GError *error = NULL;
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(cssProvider), "style.css", &error);
@@ -582,6 +616,12 @@ int main(int argc, char *argv[])
     styleContext13 = gtk_widget_get_style_context(b1);
     styleContext14 = gtk_widget_get_style_context(b2);
     styleContext15 = gtk_widget_get_style_context(b3);
+    
+
+    styleContext16 = gtk_widget_get_style_context(stateNomenclature);
+    styleContext17 = gtk_widget_get_style_context(mainMemory);
+   // styleContext18 = gtk_widget_get_style_context(start);
+    
 
     gtk_style_context_add_class(styleContext1, "mainLabel");
     gtk_style_context_add_class(styleContext2, "mainLabel");
@@ -599,6 +639,13 @@ int main(int argc, char *argv[])
     gtk_style_context_add_class(styleContext14, "mainLabel");
     gtk_style_context_add_class(styleContext15, "mainLabel");
 
+    gtk_style_context_add_class(styleContext16, "principalLabel");
+    gtk_style_context_add_class(styleContext17, "principalLabel");
+   // gtk_style_context_add_class(styleContext18, "button");
+
+    
+   
+
     gtk_style_context_add_provider(styleContext1, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -614,6 +661,12 @@ int main(int argc, char *argv[])
     gtk_style_context_add_provider(styleContext13, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext14, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext15, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    gtk_style_context_add_provider(styleContext16, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext17, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
+   // gtk_style_context_add_provider(styleContext18, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
     /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -965,7 +1018,8 @@ int main(int argc, char *argv[])
     {
         pthread_join(cpu_threads[i], NULL);
     }
-
+    pthread_join(bus_thread,NULL);
+    
     return 0;
 } // gcc -o mainUI mainUI.c `pkg-config --cflags --libs gtk+-3.0`
 // ./mainUI

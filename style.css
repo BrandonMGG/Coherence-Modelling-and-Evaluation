@@ -23,6 +23,15 @@
     font-family: Roboto;
     animation: backgroundAnim 6s ease infinite;
 }
+.principalLabel{
+    color: white;
+    font-weight: bold;
+    font-size: medium;
+    background-image: linear-gradient(to right, #8B0000, black);
+    border: 2px solid white;
+    font-family: Roboto;
+    animation: backgroundAnim 6s ease infinite;
+}
 
 
 
