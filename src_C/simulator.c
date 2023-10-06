@@ -30,7 +30,7 @@ void* cpu_thread (void *args){
     struct Instruction new_instruction;
     struct CPU *cpu = t_args->cpu;
     mqd_t mq = t_args->mq;
-    
+    printf("******CPU: %d*********",cpu->id);
     for(int i=0 ; i < 10 ; i++){
         get_random_instruction(&new_instruction);
         
@@ -76,7 +76,7 @@ int main(){
     mq = create_message_queue();
     bus_t_args.bus = &my_bus;
     bus_t_args.isBusActive = 1;
-    bus_t_args.protocolo = MESI;
+    bus_t_args.protocolo = MOESI;
     bus_t_args.mq = mq;
 
     struct cpu_thread_args cpu_thread_args_array[N_CPU];

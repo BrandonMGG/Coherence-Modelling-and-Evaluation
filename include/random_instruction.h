@@ -3,7 +3,7 @@
 #include <time.h>
 
 #define ARRAY_SIZE 8
-#define INST_ADDRESS_SIZE 16
+#define INST_ADDRESS_SIZE 4
 
 // Estructura para representar una instrucción
 struct Instruction{
