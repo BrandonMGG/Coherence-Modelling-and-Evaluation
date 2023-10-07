@@ -19,8 +19,8 @@
 int startProgramCondition;
 
 GtkBuilder *builder;
-GtkWidget *window, *grid, *start,
-    *mainGrid,
+GtkWidget *window, *grid, *start, *gridMessages,
+    *mainGrid, *messageMain, *addressX, *coreID, *messageData, *messageAddress, *messageCoreID,
     *cpu2,
     *cpu2Grid0, *memoryGrid,
     *pe2,
@@ -83,7 +83,7 @@ GtkWidget *window, *grid, *start,
     *stop,
     *step,
     *run,
-
+    *pe2upperSide, *pe1upperSide, *pe3upperSide,
     *pe3,
     *labelPE3,
     *nextPE3,
@@ -113,7 +113,7 @@ GtkWidget *window, *grid, *start,
     *currentPE1,
     *labelPE1,
     *addressPE1,
-    *dataPE1,
+    *dataPE1, *stateNomenclaturepack,
     *relleno1,
     *a0,
     *a1,
@@ -166,7 +166,12 @@ GtkWidget *window, *grid, *start,
     *currentPE1data2,
     *currentPE2data0,
     *currentPE2data1,
-    *currentPE2data2;
+    *currentPE2data2,
+    *report,
+    *messageData,
+    *messageAddress,
+    *messageCoreID,
+    *owned, *buttonsGrid;
 
 GtkComboBox *selectPE, *protocol, *operation;
 GtkWidget *label0, *label1;
@@ -208,6 +213,18 @@ struct cpu_thread_args cpu_thread_args_array[N_CPU];
 volatile int stop_thread = 0;
 pthread_t cpu_threads[N_CPU];
 pthread_t bus_t;
+int protocolo = MOESI;
+struct set_instruction
+{
+    char address[SIZE];
+    int data;
+    int core_id;
+    char op [10];
+};
+
+struct set_instruction inst;
+
+struct Instruction instr[3];
 
 void *cpu_thread(void *args)
 {
@@ -229,7 +246,7 @@ void *cpu_thread(void *args)
         printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     }
     cpu->stats.avg_exec = (cpu->stats.avg_exec) / (cpu->stats.READ_REQ_RESP + cpu->stats.WRITE_REQ_RESP + cpu->stats.INCR_REQ_RESP);
-    printf("<<<<<<<<<<CPU - %d AVG EXECUTION TIME %3.3f seconds >>>>>>>>>>>>> \n",cpu->id, cpu->stats.avg_exec);
+    printf("<<<<<<<<<<CPU - %d AVG EXECUTION TIME %3.3f seconds >>>>>>>>>>>>> \n", cpu->id, cpu->stats.avg_exec);
 
     return NULL;
 }
@@ -243,6 +260,24 @@ void *cpu_thread_step(void *args)
 
     get_random_instruction(&new_instruction);
 
+    cpu->instruction = new_instruction;
+
+    printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
+    printf("%s , %s , %d \n", new_instruction.op, new_instruction.address, new_instruction.data);
+    execute_instruction(cpu, &new_instruction, mq);
+
+    printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
+    return NULL;
+}
+
+void *cpu_thread_run(void *args)
+{
+    struct cpu_thread_args *t_args = (struct cpu_thread_args *)args;
+    struct Instruction new_instruction;
+    struct CPU *cpu = t_args->cpu;
+    mqd_t mq = t_args->mq;
+
+    new_instruction = instr[cpu->id];
     cpu->instruction = new_instruction;
 
     printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
@@ -288,7 +323,7 @@ gboolean changeLabelColor(GtkWidget *label, const char *text, const char *color)
     colorFlag = !colorFlag;
 
     const char *backgroundColor = colorFlag ? color : color;
-    const char *markup = g_markup_printf_escaped("<span background=\"%s\">%s</span>", backgroundColor, text);
+    const char *markup = g_markup_printf_escaped("<span>%s</span>", text);
 
     gtk_label_set_markup(GTK_LABEL(label), markup);
 
@@ -347,8 +382,38 @@ void button_step_clicked(GtkWidget *widget, gpointer data)
     g_print("Step!\n");
 }
 
+void button_run_clicked(GtkWidget *widget, gpointer data)
+{
+    // Crea e inicia los hilos CPU y el hilo de bus.
+    for (int i = 0; i < N_CPU; i++)
+    {
+        pthread_create(&cpu_threads[i], NULL, cpu_thread_run, (void *)&cpu_thread_args_array[i]);
+    }
+    pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+    g_print("Run!\n");
+}
+
+void button_add_clicked(GtkWidget *widget, gpointer data)
+{
+    instr[inst.core_id].data = inst.data;
+    sprintf(instr[inst.core_id].op,"%s",inst.op);
+    sprintf(instr[inst.core_id].address,"%s",inst.address);
+
+    g_print("Core: %d, Addres: %s, Data: %d, Op: %s \n",inst.core_id,inst.address,inst.data,inst.op);
+    g_print("Run!\n");
+}
+
+void button_report_clicked(GtkWidget *widget, gpointer data)
+{
+    
+    g_print("report!\n");
+}
+
 void combo_box_changed(GtkComboBox *widget, gpointer user_data)
 {
+    
+
+
     gchar *selected_text;
     GtkTreeIter iter;
     GtkListStore *store;
@@ -361,14 +426,39 @@ void combo_box_changed(GtkComboBox *widget, gpointer user_data)
     {
         gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 0, &selected_text, -1);
         g_print("Opción seleccionada: %s\n", selected_text);
+        if(strcmp(selected_text, "MESI") == 0){
+            protocolo= MESI;
+        }else if(strcmp(selected_text, "MOESI")==0){
+            protocolo= MOESI;
+        }else if(strcmp(selected_text, "PE1")==0){
+            inst.core_id = 0;
+        }else if(strcmp(selected_text, "PE2")==0){
+            inst.core_id = 1;
+        }else if(strcmp(selected_text, "PE3")==0){
+            inst.core_id = 2;
+        }else if(strcmp(selected_text, "WRITE")==0){
+            sprintf(inst.op,"WRITE");
+        }else if(strcmp(selected_text, "READ")==0){
+            sprintf(inst.op,"READ");
+        }
+        else if(strcmp(selected_text, "INCR")==0){
+            sprintf(inst.op,"INCR");
+        }else {
+            
+            sprintf(inst.address,selected_text);
+        }
         g_free(selected_text);
     }
 }
-void print_entry_text(GtkWidget *widget, gpointer data) {
+void print_entry_text(GtkWidget *widget, gpointer data)
+{
     GtkEntry *entry = GTK_ENTRY(data);
     const gchar *text = gtk_entry_get_text(entry);
     g_print("Text from the entry: %s\n", text);
+    inst.data = atoi(text);
 }
+
+
 int main(int argc, char *argv[])
 {
     startProgramCondition = 0;
@@ -387,7 +477,7 @@ int main(int argc, char *argv[])
     bus_t_args.bus = &my_bus; // Estructura bus
     //   bus_t_args.bus->channel.access
     bus_t_args.isBusActive = 1;
-    bus_t_args.protocolo = MESI;
+    bus_t_args.protocolo = protocolo;
     bus_t_args.mq = mq;
 
     // Inicializar y lanzar las threads de CPU
@@ -396,12 +486,10 @@ int main(int argc, char *argv[])
         my_bus.cpus[i].id = i;
         initializeCache(&my_bus.cpus[i].cache);
 
-
         my_bus.cpus[i].stats.INV = 0;
         my_bus.cpus[i].stats.READ_REQ_RESP = 0;
         my_bus.cpus[i].stats.WRITE_REQ_RESP = 0;
         my_bus.cpus[i].stats.INCR_REQ_RESP = 0;
-
 
         cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
         cpu_thread_args_array[i].mq = mq;
@@ -414,6 +502,11 @@ int main(int argc, char *argv[])
     // char *currentPE1 = my_bus.;
 
     // Join threads and its args data structures
+
+    int *messAcc = &(my_bus.channel.access);
+    char *messAdd = my_bus.channel.address;
+    int *messCore = my_bus.channel.id;
+
 
     char *currentPE_0_op = my_bus.cpus[0].instruction.op;
     char *currentPE_0_add = my_bus.cpus[0].instruction.address;
@@ -515,11 +608,15 @@ int main(int argc, char *argv[])
     LabelDataInt MD0, MD1, MD2, MD3, MD4, MD5, MD6, MD7, MD8, MD9, MD10, MD11, MD12, MD13, MD14, MD15;
     LabelData curr_0_add, curr_1_add, curr_2_add, curr_0_op, curr_1_op, curr_2_op;
     LabelDataInt curr_0_dat, curr_1_dat, curr_2_dat;
+    LabelData message_Add;
+    LabelDataInt message_Acc,message_core;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     memoryGrid = GTK_WIDGET(gtk_builder_get_object(builder, "memoryGrid"));
+    gridMessages = GTK_WIDGET(gtk_builder_get_object(builder, "gridMessages"));
+
     grid = GTK_WIDGET(gtk_builder_get_object(builder, "mainGrid")); // Replace "my_grid" with your GtkGrid ID
 
     /*=================================Botones=====================================*/
@@ -531,13 +628,24 @@ int main(int argc, char *argv[])
     step = GTK_WIDGET(gtk_builder_get_object(builder, "step"));
     g_signal_connect(G_OBJECT(step), "clicked", G_CALLBACK(button_step_clicked), NULL);
 
+    report = GTK_WIDGET(gtk_builder_get_object(builder, "report"));
+    g_signal_connect(G_OBJECT(report), "clicked", G_CALLBACK(button_report_clicked), NULL);
+    
+    //g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(print_entry_text), NULL);
+
+    run = GTK_WIDGET(gtk_builder_get_object(builder, "run"));
+
     enterData = GTK_ENTRY(gtk_builder_get_object(builder, "dataInput"));
-     // When the GTK main loop exits, you can get the text from the entry widget
+    // When the GTK main loop exits, you can get the text from the entry widget
     const gchar *textEntrada = gtk_entry_get_text(enterData);
     g_print("Text from the entry: %s\n", textEntrada); 
 
-    g_signal_connect(step, "clicked", G_CALLBACK(print_entry_text), enterData); //BOTON STEP TRIGGER TEXT input entrada de datos
+    g_signal_connect(run, "clicked", G_CALLBACK(button_run_clicked), enterData); //BOTON STEP TRIGGER TEXT input entrada de datos
 
+    add = GTK_WIDGET(gtk_builder_get_object(builder, "add"));
+    g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(print_entry_text), enterData);
+    g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(button_add_clicked), enterData);
+    
 
     // Crear el combo box
     selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
@@ -627,7 +735,7 @@ int main(int argc, char *argv[])
 
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(addressDropdown), renderer2, TRUE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(addressDropdown), renderer2, "text", 0, NULL);
-    
+
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(protocol), renderer3, TRUE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(protocol), renderer3, "text", 0, NULL);
 
@@ -729,6 +837,11 @@ int main(int argc, char *argv[])
     b2 = GTK_WIDGET(gtk_builder_get_object(builder, "b2"));
     b3 = GTK_WIDGET(gtk_builder_get_object(builder, "b3"));
 
+    c0 = GTK_WIDGET(gtk_builder_get_object(builder, "c0"));
+    c1 = GTK_WIDGET(gtk_builder_get_object(builder, "c1"));
+    c2 = GTK_WIDGET(gtk_builder_get_object(builder, "c2"));
+    c3 = GTK_WIDGET(gtk_builder_get_object(builder, "c3"));
+
     relleno1 = GTK_WIDGET(gtk_builder_get_object(builder, "relleno1"));
     relleno2 = GTK_WIDGET(gtk_builder_get_object(builder, "relleno2"));
     relleno3 = GTK_WIDGET(gtk_builder_get_object(builder, "relleno3"));
@@ -746,7 +859,20 @@ int main(int argc, char *argv[])
     currentPE3data1 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data1"));
     currentPE3data2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data2"));
 
+    pe1upperSide = GTK_WIDGET(gtk_builder_get_object(builder, "pe1upperSide"));
+    pe2upperSide = GTK_WIDGET(gtk_builder_get_object(builder, "cpu2Grid0"));
+    pe3upperSide = GTK_WIDGET(gtk_builder_get_object(builder, "pe3upperSide"));
+
+    owned = GTK_WIDGET(gtk_builder_get_object(builder, "owned"));
+    buttonsGrid = GTK_WIDGET(gtk_builder_get_object(builder, "buttonsGrid"));
+
+    stateNomenclaturepack = GTK_WIDGET(gtk_builder_get_object(builder, "stateNomenclaturepack"));
+
     selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
+
+    messageAddress = GTK_WIDGET(gtk_builder_get_object(builder, "messageAddress"));
+    messageCoreID = GTK_WIDGET(gtk_builder_get_object(builder, "messageCoreID"));
+    messageData = GTK_WIDGET(gtk_builder_get_object(builder, "messageData"));
 
     gtk_combo_box_text_append_text(selectPE, "PE1");
     // gtk_combo_box_text_append_text(selectPE,"PE2");
@@ -781,7 +907,26 @@ int main(int argc, char *argv[])
         *styleContext25,
         *styleContext26,
         *styleContext27,
-        *styleContext28, *styleContext29, *styleContext30, *styleContext31, *styleContext32, *styleContext33, *styleContext34;
+        *styleContext28,
+        *styleContext29,
+        *styleContext30,
+        *styleContext31,
+        *styleContext32,
+        *styleContext33,
+        *styleContext34,
+        *styleContext35,
+        *styleContext36,
+        *styleContext37,
+        *styleContext38,
+        *styleContext39,
+        *styleContext40,
+        *styleContext41,
+        *styleContext42,
+        *styleContext43,
+        *styleContext44,
+        *styleContext45,
+        *styleContext46,
+        *styleContext47;
 
     GError *error = NULL;
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(cssProvider), "style.css", &error);
@@ -821,6 +966,24 @@ int main(int argc, char *argv[])
 
     styleContext29 = gtk_widget_get_style_context(addressPE3);
 
+    styleContext30 = gtk_widget_get_style_context(c0);
+    styleContext31 = gtk_widget_get_style_context(c1);
+    styleContext32 = gtk_widget_get_style_context(c2);
+    styleContext33 = gtk_widget_get_style_context(c3);
+
+    styleContext34 = gtk_widget_get_style_context(gridMessages);
+
+    styleContext35 = gtk_widget_get_style_context(pe1upperSide);
+    styleContext36 = gtk_widget_get_style_context(pe2upperSide);
+    styleContext37 = gtk_widget_get_style_context(pe3upperSide);
+    styleContext38 = gtk_widget_get_style_context(stateNomenclaturepack);
+
+    styleContext39 = gtk_widget_get_style_context(owned);
+    styleContext40 = gtk_widget_get_style_context(buttonsGrid);
+    styleContext41 = gtk_widget_get_style_context(step);
+    styleContext42 = gtk_widget_get_style_context(stop);
+    styleContext43 = gtk_widget_get_style_context(run);
+
     gtk_style_context_add_class(styleContext1, "mainLabel");
     gtk_style_context_add_class(styleContext2, "mainLabel");
     gtk_style_context_add_class(styleContext3, "mainLabel");
@@ -855,6 +1018,22 @@ int main(int argc, char *argv[])
     gtk_style_context_add_class(styleContext28, "mainLabel");
     gtk_style_context_add_class(styleContext29, "mainLabel");
 
+    gtk_style_context_add_class(styleContext30, "mainLabel");
+    gtk_style_context_add_class(styleContext31, "mainLabel");
+    gtk_style_context_add_class(styleContext32, "mainLabel");
+    gtk_style_context_add_class(styleContext33, "mainLabel");
+    gtk_style_context_add_class(styleContext34, "mainLabel");
+
+    gtk_style_context_add_class(styleContext35, "mainLabel");
+    gtk_style_context_add_class(styleContext36, "mainLabel");
+    gtk_style_context_add_class(styleContext37, "mainLabel");
+    gtk_style_context_add_class(styleContext38, "mainLabel");
+    gtk_style_context_add_class(styleContext39, "mainLabel");
+    gtk_style_context_add_class(styleContext40, "mainLabel");
+    gtk_style_context_add_class(styleContext41, "button");
+    gtk_style_context_add_class(styleContext42, "button");
+    gtk_style_context_add_class(styleContext43, "button");
+
     gtk_style_context_add_provider(styleContext1, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -887,14 +1066,23 @@ int main(int argc, char *argv[])
     gtk_style_context_add_provider(styleContext28, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext29, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-    /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext5, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext6, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext7, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext8, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-     gtk_style_context_add_provider(styleContext9, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);*/
+    gtk_style_context_add_provider(styleContext30, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext31, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext32, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext33, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext34, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    gtk_style_context_add_provider(styleContext35, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext36, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext37, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    gtk_style_context_add_provider(styleContext38, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext39, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext40, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext41, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext42, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider(styleContext43, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
     g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -1155,6 +1343,18 @@ int main(int argc, char *argv[])
     curr_2_dat.text = currentPE_2_dat;
     curr_2_dat.color = "white";
 
+    message_Add.label = messageAddress;
+    message_Add.text =  messAdd;
+    message_Add.color = "white";
+
+    message_Acc.label = messageData;
+    message_Acc.text = messAcc;
+    message_Acc.color = "white";
+
+    message_core.label = messageCoreID;
+    message_core.text = messCore;
+    message_core.color = "white";
+
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
     guint timer_id2 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress2);
@@ -1227,6 +1427,10 @@ int main(int argc, char *argv[])
     guint timer_id60 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_1_dat);
     guint timer_id61 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_2_dat);
 
+    //guint timer_id62 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &message_Add);
+    //guint timer_id63 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_Acc);
+    //guint timer_id64 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_core);
+
     // NO PONER NADA POR ABAJO DE ACA
     gtk_widget_show_all(window);
 
@@ -1237,7 +1441,7 @@ int main(int argc, char *argv[])
         pthread_join(cpu_threads[i], NULL);
     }
 
-    pthread_join(bus_t,NULL);
+    pthread_join(bus_t, NULL);
 
     bus_t_args.isBusActive = 0;
 

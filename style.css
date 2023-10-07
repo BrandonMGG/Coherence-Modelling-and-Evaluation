@@ -16,7 +16,7 @@
 .mainLabel {
     color: white;
     font-weight: bold;
-    background-image: linear-gradient(to right, #00FFFF, #8a2BE2, #00ff00);
+    background-image: linear-gradient(to right,#8B0000, black);
     border: 2px solid white;
     font-family: Roboto;
     animation: backgroundAnim 6s ease infinite;
@@ -24,24 +24,33 @@
 .principalLabel{
     color: white;
     font-weight: bold;
-    font-size: medium;
+    font-size:large;
     background-image: linear-gradient(to right, #8B0000, black);
-    border: 3px solid black;
+    border: 2px solid white;
     font-family: Roboto;
     animation: backgroundAnim 6s ease infinite;
 }
 .button {
-    background-color: #ff1493; /* Neon Pink */
-    color: #00ff00; /* Neon Green */
+    background-color: #8B0000; /* Neon Pink */
+    color: black; /* Neon Green */
     border: none;
     padding: 10px 20px;
-    font-size: 18px;
+    font-size: 14px;
     font-weight: bold;
     border-radius: 5px;
     
     outline: none;
     
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.header{
+
+    color: white;
+    font-weight: bold;
+    font-size: medium;
+    background-image: linear-gradient(to right, #848482, #848482);
+    border: 3px solid black;
+    font-family: Roboto;
 }
 
 .button:hover {
