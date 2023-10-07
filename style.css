@@ -11,8 +11,6 @@
 }
 
 .label1{
-    color: white;
-    font-weight: bold;
     background-color: black;
 }
 .mainLabel {
@@ -28,11 +26,29 @@
     font-weight: bold;
     font-size: medium;
     background-image: linear-gradient(to right, #8B0000, black);
-    border: 2px solid white;
+    border: 3px solid black;
     font-family: Roboto;
     animation: backgroundAnim 6s ease infinite;
 }
+.button {
+    background-color: #ff1493; /* Neon Pink */
+    color: #00ff00; /* Neon Green */
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 5px;
+    
+    outline: none;
+    
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
+.button:hover {
+    background-color: #00ff00; /* Neon Green */
+    color: #ff1493; /* Neon Pink */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 
 
 @keyframes neon {
