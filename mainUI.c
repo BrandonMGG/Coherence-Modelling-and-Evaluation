@@ -75,7 +75,7 @@ GtkWidget *window, *grid, *start,
     *statePE4,
     *cyclesLabel,
     *cyclesNumber,
-  
+
     *addressDropdown,
     *dataInput,
     *add,
@@ -83,7 +83,7 @@ GtkWidget *window, *grid, *start,
     *stop,
     *step,
     *run,
-    *operation,
+
     *pe3,
     *labelPE3,
     *nextPE3,
@@ -109,7 +109,7 @@ GtkWidget *window, *grid, *start,
     *c3Address,
     *statePE3,
     *pe1,
-    *nextPE1,*currentPE3data2,
+    *nextPE1, *currentPE3data2,
     *currentPE1,
     *labelPE1,
     *addressPE1,
@@ -168,8 +168,9 @@ GtkWidget *window, *grid, *start,
     *currentPE2data1,
     *currentPE2data2;
 
-GtkComboBox *selectPE;
+GtkComboBox *selectPE, *protocol, *operation;
 GtkWidget *label0, *label1;
+GtkEntry *enterData;
 GtkWidget *event_box;
 GtkWidget *box;
 
@@ -214,9 +215,9 @@ void *cpu_thread(void *args)
     struct Instruction new_instruction;
     struct CPU *cpu = t_args->cpu;
     mqd_t mq = t_args->mq;
-    
-    
-    while (!stop_thread) {
+
+    while (!stop_thread)
+    {
         get_random_instruction(&new_instruction);
 
         cpu->instruction = new_instruction;
@@ -228,7 +229,6 @@ void *cpu_thread(void *args)
         printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     }
 
-    
     return NULL;
 }
 
@@ -244,7 +244,7 @@ void *cpu_thread_step(void *args)
     cpu->instruction = new_instruction;
 
     printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
-    printf("%s , %s , %d \n", new_instruction.op,new_instruction.address,new_instruction.data);
+    printf("%s , %s , %d \n", new_instruction.op, new_instruction.address, new_instruction.data);
     execute_instruction(cpu, &new_instruction, mq);
 
     printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
@@ -345,7 +345,6 @@ void button_step_clicked(GtkWidget *widget, gpointer data)
     g_print("Step!\n");
 }
 
-
 void combo_box_changed(GtkComboBox *widget, gpointer user_data)
 {
     gchar *selected_text;
@@ -363,8 +362,11 @@ void combo_box_changed(GtkComboBox *widget, gpointer user_data)
         g_free(selected_text);
     }
 }
-
-
+void print_entry_text(GtkWidget *widget, gpointer data) {
+    GtkEntry *entry = GTK_ENTRY(data);
+    const gchar *text = gtk_entry_get_text(entry);
+    g_print("Text from the entry: %s\n", text);
+}
 int main(int argc, char *argv[])
 {
     startProgramCondition = 0;
@@ -402,7 +404,7 @@ int main(int argc, char *argv[])
     }
     // pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
 
-    //g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
+    // g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
 
     // char *currentPE1 = my_bus.;
 
@@ -524,33 +526,111 @@ int main(int argc, char *argv[])
     step = GTK_WIDGET(gtk_builder_get_object(builder, "step"));
     g_signal_connect(G_OBJECT(step), "clicked", G_CALLBACK(button_step_clicked), NULL);
 
+    enterData = GTK_ENTRY(gtk_builder_get_object(builder, "dataInput"));
+     // When the GTK main loop exits, you can get the text from the entry widget
+    const gchar *textEntrada = gtk_entry_get_text(enterData);
+    g_print("Text from the entry: %s\n", textEntrada); 
+
+    g_signal_connect(step, "clicked", G_CALLBACK(print_entry_text), enterData); //BOTON STEP TRIGGER TEXT input entrada de datos
+
+
     // Crear el combo box
     selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
+    operation = GTK_COMBO_BOX(gtk_builder_get_object(builder, "operation"));
+    addressDropdown = GTK_COMBO_BOX(gtk_builder_get_object(builder, "addressDropdown"));
+    protocol = GTK_COMBO_BOX(gtk_builder_get_object(builder, "protocol"));
 
     // Crear un modelo de lista para las opciones del combo box
     GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
-    GtkTreeIter iter; // Declarar el iterador
+    GtkListStore *storeOperation = gtk_list_store_new(1, G_TYPE_STRING);
+    GtkListStore *storeAddress = gtk_list_store_new(1, G_TYPE_STRING);
+    GtkListStore *storeProtocol = gtk_list_store_new(1, G_TYPE_STRING);
+
+    GtkTreeIter iter, iter1, iter2, iter3; // Declarar el iterador
 
     // Agregar opciones al modelo de lista
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Opción 1", -1);
+    gtk_list_store_set(store, &iter, 0, "PE1", -1);
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Opción 2", -1);
+    gtk_list_store_set(store, &iter, 0, "PE2", -1);
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Opción 3", -1);
+    gtk_list_store_set(store, &iter, 0, "PE3", -1);
+
+    gtk_list_store_append(storeOperation, &iter1);
+    gtk_list_store_set(storeOperation, &iter1, 0, "WRITE", -1);
+    gtk_list_store_append(storeOperation, &iter1);
+    gtk_list_store_set(storeOperation, &iter1, 0, "READ", -1);
+    gtk_list_store_append(storeOperation, &iter1);
+    gtk_list_store_set(storeOperation, &iter1, 0, "INCR", -1);
+
+    gtk_list_store_append(storeProtocol, &iter3);
+    gtk_list_store_set(storeProtocol, &iter3, 0, "MESI", -1);
+    gtk_list_store_append(storeProtocol, &iter3);
+    gtk_list_store_set(storeProtocol, &iter3, 0, "MOESI", -1);
+
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x0", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x1", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x2", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x3", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x4", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x5", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x6", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x7", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x8", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0x9", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0xA", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0xB", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0xC", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0xD", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0xE", -1);
+    gtk_list_store_append(storeAddress, &iter2);
+    gtk_list_store_set(storeAddress, &iter2, 0, "0xF", -1);
 
     // Conectar el modelo de lista al combo box
     gtk_combo_box_set_model(selectPE, GTK_TREE_MODEL(store));
+    gtk_combo_box_set_model(operation, GTK_TREE_MODEL(storeOperation));
+    gtk_combo_box_set_model(addressDropdown, GTK_TREE_MODEL(storeAddress));
+    gtk_combo_box_set_model(protocol, GTK_TREE_MODEL(storeProtocol));
 
     // Crear un renderizador para mostrar las opciones en el combo box
     GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkCellRenderer *renderer1 = gtk_cell_renderer_text_new();
+    GtkCellRenderer *renderer2 = gtk_cell_renderer_text_new();
+    GtkCellRenderer *renderer3 = gtk_cell_renderer_text_new();
 
     // Conectar el renderizador al combo box
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(selectPE), renderer, TRUE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(selectPE), renderer, "text", 0, NULL);
-    g_signal_connect(G_OBJECT(selectPE), "changed", G_CALLBACK(combo_box_changed), NULL);
 
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(operation), renderer1, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(operation), renderer1, "text", 0, NULL);
+
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(addressDropdown), renderer2, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(addressDropdown), renderer2, "text", 0, NULL);
     
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(protocol), renderer3, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(protocol), renderer3, "text", 0, NULL);
+
+    g_signal_connect(G_OBJECT(selectPE), "changed", G_CALLBACK(combo_box_changed), NULL);
+    g_signal_connect(G_OBJECT(operation), "changed", G_CALLBACK(combo_box_changed), NULL);
+    g_signal_connect(G_OBJECT(addressDropdown), "changed", G_CALLBACK(combo_box_changed), NULL);
+    g_signal_connect(G_OBJECT(protocol), "changed", G_CALLBACK(combo_box_changed), NULL);
+
     /*=================================Botones=====================================*/
 
     a0Address = GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
@@ -638,7 +718,6 @@ int main(int argc, char *argv[])
 
     stateNomenclature = GTK_WIDGET(gtk_builder_get_object(builder, "stateNomenclature"));
     mainMemory = GTK_WIDGET(gtk_builder_get_object(builder, "mainMemory"));
-  
 
     b0 = GTK_WIDGET(gtk_builder_get_object(builder, "b0"));
     b1 = GTK_WIDGET(gtk_builder_get_object(builder, "b1"));
@@ -662,13 +741,11 @@ int main(int argc, char *argv[])
     currentPE3data1 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data1"));
     currentPE3data2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data2"));
 
-   
     selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
 
-    gtk_combo_box_text_append_text(selectPE,"PE1");
-    //gtk_combo_box_text_append_text(selectPE,"PE2");
-   // gtk_combo_box_text_append_text(selectPE,"PE3");
-
+    gtk_combo_box_text_append_text(selectPE, "PE1");
+    // gtk_combo_box_text_append_text(selectPE,"PE2");
+    // gtk_combo_box_text_append_text(selectPE,"PE3");
 
     GtkCssProvider *cssProvider = gtk_css_provider_new();
     GtkStyleContext *styleContext,
@@ -805,7 +882,6 @@ int main(int argc, char *argv[])
     gtk_style_context_add_provider(styleContext28, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext29, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
- 
     /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -1155,9 +1231,9 @@ int main(int argc, char *argv[])
     {
         pthread_join(cpu_threads[i], NULL);
     }
-    pthread_join(bus_thread,NULL);
+    pthread_join(bus_thread, NULL);
 
-    bus_t_args.isBusActive=0;
+    bus_t_args.isBusActive = 0;
 
     return 0;
 } // gcc -o mainUI mainUI.c `pkg-config --cflags --libs gtk+-3.0`

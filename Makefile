@@ -16,7 +16,7 @@ controller: src_C/cache_moesi.c src_C/cpu.c src_C/controller.c $(inc_cache) $(in
 	$(CC) $(CFLAGS) -o bin/controller src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c src_C/controller.c  -lrt
 
 mainUI: src_C/memory.c src_C/messages.c src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c src_C/bus.c mainUI.c $(inc_memory) $(inc_cache) $(inc_rand) $(inc_cpu) $(inc_msg)
-	$(CC) $(CFLAGS) -o mainUI src_C/memory.c src_C/messages.c src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c src_C/bus.c mainUI.c -lrt -lpthread `pkg-config --cflags --libs gtk+-3.0`
+	$(CC) $(CFLAGS) -o bin/mainUI src_C/memory.c src_C/messages.c src_C/cache_moesi.c src_C/random_instruction.c src_C/cpu.c src_C/bus.c mainUI.c -lrt -lpthread `pkg-config --cflags --libs gtk+-3.0`
 
 run_bus:
 	bin/bus
@@ -31,7 +31,7 @@ run_controller:
 	bin/controller
 
 run_simulator:
-	mainUI
+	bin/mainUI
 
 
 clean:
