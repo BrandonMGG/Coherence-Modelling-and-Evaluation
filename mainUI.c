@@ -209,6 +209,18 @@ struct cpu_thread_args cpu_thread_args_array[N_CPU];
 volatile int stop_thread = 0;
 pthread_t cpu_threads[N_CPU];
 pthread_t bus_t;
+int protocolo = MOESI;
+struct set_instruction
+{
+    char address[SIZE];
+    int data;
+    int core_id;
+    char op [10];
+};
+
+struct set_instruction inst;
+
+struct Instruction instr[3];
 
 void *cpu_thread(void *args)
 {
@@ -244,6 +256,24 @@ void *cpu_thread_step(void *args)
 
     get_random_instruction(&new_instruction);
 
+    cpu->instruction = new_instruction;
+
+    printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
+    printf("%s , %s , %d \n", new_instruction.op, new_instruction.address, new_instruction.data);
+    execute_instruction(cpu, &new_instruction, mq);
+
+    printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
+    return NULL;
+}
+
+void *cpu_thread_run(void *args)
+{
+    struct cpu_thread_args *t_args = (struct cpu_thread_args *)args;
+    struct Instruction new_instruction;
+    struct CPU *cpu = t_args->cpu;
+    mqd_t mq = t_args->mq;
+
+    new_instruction = instr[cpu->id];
     cpu->instruction = new_instruction;
 
     printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
@@ -348,8 +378,33 @@ void button_step_clicked(GtkWidget *widget, gpointer data)
     g_print("Step!\n");
 }
 
+void button_run_clicked(GtkWidget *widget, gpointer data)
+{
+    // Crea e inicia los hilos CPU y el hilo de bus.
+    for (int i = 0; i < N_CPU; i++)
+    {
+        pthread_create(&cpu_threads[i], NULL, cpu_thread_run, (void *)&cpu_thread_args_array[i]);
+    }
+    pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+    g_print("Run!\n");
+}
+
+void button_add_clicked(GtkWidget *widget, gpointer data)
+{
+    instr[inst.core_id].data = inst.data;
+    sprintf(instr[inst.core_id].op,"%s",inst.op);
+    sprintf(instr[inst.core_id].address,"%s",inst.address);
+
+    g_print("Core: %d, Addres: %s, Data: %d, Op: %s \n",inst.core_id,inst.address,inst.data,inst.op);
+    g_print("Run!\n");
+}
+
+
 void combo_box_changed(GtkComboBox *widget, gpointer user_data)
 {
+    
+
+
     gchar *selected_text;
     GtkTreeIter iter;
     GtkListStore *store;
@@ -362,6 +417,27 @@ void combo_box_changed(GtkComboBox *widget, gpointer user_data)
     {
         gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 0, &selected_text, -1);
         g_print("Opción seleccionada: %s\n", selected_text);
+        if(strcmp(selected_text, "MESI") == 0){
+            protocolo= MESI;
+        }else if(strcmp(selected_text, "MOESI")==0){
+            protocolo= MOESI;
+        }else if(strcmp(selected_text, "PE1")==0){
+            inst.core_id = 0;
+        }else if(strcmp(selected_text, "PE2")==0){
+            inst.core_id = 1;
+        }else if(strcmp(selected_text, "PE3")==0){
+            inst.core_id = 2;
+        }else if(strcmp(selected_text, "WRITE")==0){
+            sprintf(inst.op,"WRITE");
+        }else if(strcmp(selected_text, "READ")==0){
+            sprintf(inst.op,"READ");
+        }
+        else if(strcmp(selected_text, "INCR")==0){
+            sprintf(inst.op,"INCR");
+        }else {
+            
+            sprintf(inst.address,selected_text);
+        }
         g_free(selected_text);
     }
 }
@@ -370,7 +446,10 @@ void print_entry_text(GtkWidget *widget, gpointer data)
     GtkEntry *entry = GTK_ENTRY(data);
     const gchar *text = gtk_entry_get_text(entry);
     g_print("Text from the entry: %s\n", text);
+    inst.data = atoi(text);
 }
+
+
 int main(int argc, char *argv[])
 {
     startProgramCondition = 0;
@@ -389,7 +468,7 @@ int main(int argc, char *argv[])
     bus_t_args.bus = &my_bus; // Estructura bus
     //   bus_t_args.bus->channel.access
     bus_t_args.isBusActive = 1;
-    bus_t_args.protocolo = MESI;
+    bus_t_args.protocolo = protocolo;
     bus_t_args.mq = mq;
 
     // Inicializar y lanzar las threads de CPU
@@ -533,12 +612,22 @@ int main(int argc, char *argv[])
     step = GTK_WIDGET(gtk_builder_get_object(builder, "step"));
     g_signal_connect(G_OBJECT(step), "clicked", G_CALLBACK(button_step_clicked), NULL);
 
+    
+    //g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(print_entry_text), NULL);
+
+    run = GTK_WIDGET(gtk_builder_get_object(builder, "run"));
+
     enterData = GTK_ENTRY(gtk_builder_get_object(builder, "dataInput"));
     // When the GTK main loop exits, you can get the text from the entry widget
     const gchar *textEntrada = gtk_entry_get_text(enterData);
-    g_print("Text from the entry: %s\n", textEntrada);
+    g_print("Text from the entry: %s\n", textEntrada); 
 
-    g_signal_connect(step, "clicked", G_CALLBACK(print_entry_text), enterData); // BOTON STEP TRIGGER TEXT input entrada de datos
+    g_signal_connect(run, "clicked", G_CALLBACK(button_run_clicked), enterData); //BOTON STEP TRIGGER TEXT input entrada de datos
+
+    add = GTK_WIDGET(gtk_builder_get_object(builder, "add"));
+    g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(print_entry_text), enterData);
+    g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(button_add_clicked), enterData);
+    
 
     // Crear el combo box
     selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
