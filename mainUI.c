@@ -167,6 +167,10 @@ GtkWidget *window, *grid, *start, *gridMessages,
     *currentPE2data0,
     *currentPE2data1,
     *currentPE2data2,
+    *report,
+    *messageData,
+    *messageAddress,
+    *messageCoreID,
     *owned, *buttonsGrid;
 
 GtkComboBox *selectPE, *protocol, *operation;
@@ -399,6 +403,11 @@ void button_add_clicked(GtkWidget *widget, gpointer data)
     g_print("Run!\n");
 }
 
+void button_report_clicked(GtkWidget *widget, gpointer data)
+{
+    
+    g_print("report!\n");
+}
 
 void combo_box_changed(GtkComboBox *widget, gpointer user_data)
 {
@@ -493,6 +502,11 @@ int main(int argc, char *argv[])
     // char *currentPE1 = my_bus.;
 
     // Join threads and its args data structures
+
+    int *messAcc = &(my_bus.channel.access);
+    char *messAdd = my_bus.channel.address;
+    int *messCore = my_bus.channel.id;
+
 
     char *currentPE_0_op = my_bus.cpus[0].instruction.op;
     char *currentPE_0_add = my_bus.cpus[0].instruction.address;
@@ -594,6 +608,8 @@ int main(int argc, char *argv[])
     LabelDataInt MD0, MD1, MD2, MD3, MD4, MD5, MD6, MD7, MD8, MD9, MD10, MD11, MD12, MD13, MD14, MD15;
     LabelData curr_0_add, curr_1_add, curr_2_add, curr_0_op, curr_1_op, curr_2_op;
     LabelDataInt curr_0_dat, curr_1_dat, curr_2_dat;
+    LabelData message_Add;
+    LabelDataInt message_Acc,message_core;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, "memoryCoherence.ui", NULL);
@@ -612,6 +628,8 @@ int main(int argc, char *argv[])
     step = GTK_WIDGET(gtk_builder_get_object(builder, "step"));
     g_signal_connect(G_OBJECT(step), "clicked", G_CALLBACK(button_step_clicked), NULL);
 
+    report = GTK_WIDGET(gtk_builder_get_object(builder, "report"));
+    g_signal_connect(G_OBJECT(report), "clicked", G_CALLBACK(button_report_clicked), NULL);
     
     //g_signal_connect(G_OBJECT(add), "clicked", G_CALLBACK(print_entry_text), NULL);
 
@@ -851,6 +869,10 @@ int main(int argc, char *argv[])
     stateNomenclaturepack = GTK_WIDGET(gtk_builder_get_object(builder, "stateNomenclaturepack"));
 
     selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
+
+    messageAddress = GTK_WIDGET(gtk_builder_get_object(builder, "messageAddress"));
+    messageCoreID = GTK_WIDGET(gtk_builder_get_object(builder, "messageCoreID"));
+    messageData = GTK_WIDGET(gtk_builder_get_object(builder, "messageData"));
 
     gtk_combo_box_text_append_text(selectPE, "PE1");
     // gtk_combo_box_text_append_text(selectPE,"PE2");
@@ -1321,6 +1343,18 @@ int main(int argc, char *argv[])
     curr_2_dat.text = currentPE_2_dat;
     curr_2_dat.color = "white";
 
+    message_Add.label = messageAddress;
+    message_Add.text =  messAdd;
+    message_Add.color = "white";
+
+    message_Acc.label = messageData;
+    message_Acc.text = messAcc;
+    message_Acc.color = "white";
+
+    message_core.label = messageCoreID;
+    message_core.text = messCore;
+    message_core.color = "white";
+
     guint timer_id4 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress0);
     guint timer_id1 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress1);
     guint timer_id2 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &cpuDataAddress2);
@@ -1392,6 +1426,10 @@ int main(int argc, char *argv[])
     guint timer_id59 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_0_dat);
     guint timer_id60 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_1_dat);
     guint timer_id61 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_2_dat);
+
+    //guint timer_id62 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &message_Add);
+    //guint timer_id63 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_Acc);
+    //guint timer_id64 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_core);
 
     // NO PONER NADA POR ABAJO DE ACA
     gtk_widget_show_all(window);
