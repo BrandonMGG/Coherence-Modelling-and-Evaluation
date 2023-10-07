@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mqueue.h>
 
+
 // Estados de los bloques de caché
 #define CACHE_SIZE 4
 
@@ -10,6 +11,8 @@ struct Stats{
     int INV;
     int READ_REQ_RESP;
     int WRITE_REQ_RESP;
+    int INCR_REQ_RESP;
+    double avg_exec;
 };
 
 // Definir una estructura para representar una CPU

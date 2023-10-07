@@ -20,9 +20,10 @@ void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t mq) {
     printf("  Dirección: %s\n", instr->address);
     printf("  Datos: %d\n", instr->data);
     //printf("\n");
-    
+    time_t start = clock();
     if (strcmp(instr->op, read_char) == 0){
         readCacheBlock(&cpu->cache,instr->address, cpu->id, mq);
+        cpu->stats.READ_REQ_RESP++;
         
     }else if (strcmp(instr->op, write_char) == 0){
         if(writeCacheBlock(&cpu->cache,instr->address,instr->data,cpu->id, mq) == 1){
@@ -34,8 +35,10 @@ void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t mq) {
         //Leer dato, sumar 1 y escribir dato en memoria 
         //readCacheBlock(&cpu->cache,instr->address, cpu->id, mq);
         write_INCR_CacheBlock(&cpu->cache,instr->address,instr->data,cpu->id, mq);
-
+        cpu->stats.INCR_REQ_RESP++;
     }
+    time_t end = clock();
+    cpu->stats.avg_exec += ((double)(end-start))/CLOCKS_PER_SEC;
 }
 
 //  int main() {
