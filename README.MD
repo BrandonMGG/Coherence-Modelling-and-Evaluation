@@ -8,7 +8,7 @@ This cache coherence modeling and simulation tool, implemented in C, helps us un
 2. Compile and run the User Interface: `make mainUI, `make ./mainUI`
 
 # Tools and dependencies
-- `GCC compiler`:
+- `GCC compiler`
 - `Make Utility`
 - `POSIX Threads (pthread) library`: `<pthread.h>`
 - `Message Queue library (for inter-thread communication)`: `<mqueue.h>`
