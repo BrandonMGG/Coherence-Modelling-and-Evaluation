@@ -345,6 +345,26 @@ void button_step_clicked(GtkWidget *widget, gpointer data)
     g_print("Step!\n");
 }
 
+
+void combo_box_changed(GtkComboBox *widget, gpointer user_data)
+{
+    gchar *selected_text;
+    GtkTreeIter iter;
+    GtkListStore *store;
+
+    // Obtener el modelo de lista del combo box
+    store = GTK_LIST_STORE(gtk_combo_box_get_model(widget));
+
+    // Obtener el texto de la opción seleccionada
+    if (gtk_combo_box_get_active_iter(widget, &iter))
+    {
+        gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 0, &selected_text, -1);
+        g_print("Opción seleccionada: %s\n", selected_text);
+        g_free(selected_text);
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     startProgramCondition = 0;
@@ -503,6 +523,34 @@ int main(int argc, char *argv[])
 
     step = GTK_WIDGET(gtk_builder_get_object(builder, "step"));
     g_signal_connect(G_OBJECT(step), "clicked", G_CALLBACK(button_step_clicked), NULL);
+
+    // Crear el combo box
+    selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
+
+    // Crear un modelo de lista para las opciones del combo box
+    GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
+    GtkTreeIter iter; // Declarar el iterador
+
+    // Agregar opciones al modelo de lista
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Opción 1", -1);
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Opción 2", -1);
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Opción 3", -1);
+
+    // Conectar el modelo de lista al combo box
+    gtk_combo_box_set_model(selectPE, GTK_TREE_MODEL(store));
+
+    // Crear un renderizador para mostrar las opciones en el combo box
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+
+    // Conectar el renderizador al combo box
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(selectPE), renderer, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(selectPE), renderer, "text", 0, NULL);
+    g_signal_connect(G_OBJECT(selectPE), "changed", G_CALLBACK(combo_box_changed), NULL);
+
+    
     /*=================================Botones=====================================*/
 
     a0Address = GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
