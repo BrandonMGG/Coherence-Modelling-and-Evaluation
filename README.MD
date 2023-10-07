@@ -3,7 +3,7 @@ This cache coherence modeling and simulation tool, implemented in C, helps us un
 
 # Installation
 1. Clone the repository to your local machine:
-   - git clone [](https://github.com/BrandonMGG/Coherence-Modelling-and-Evaluation)
+   - `git clone https://github.com/BrandonMGG/Coherence-Modelling-and-Evaluation`
    - cd cache-coherence-modeling
 2. Compile and run the User Interface: `make mainUI, `make ./mainUI`
 
