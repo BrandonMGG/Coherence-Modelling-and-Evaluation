@@ -505,7 +505,7 @@ int main(int argc, char *argv[])
 
     int *messAcc = &(my_bus.channel.access);
     char *messAdd = my_bus.channel.address;
-    int *messCore = my_bus.channel.id;
+    int *messCore = &(my_bus.channel.id);
 
 
     char *currentPE_0_op = my_bus.cpus[0].instruction.op;
@@ -1427,9 +1427,9 @@ int main(int argc, char *argv[])
     guint timer_id60 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_1_dat);
     guint timer_id61 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &curr_2_dat);
 
-    //guint timer_id62 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &message_Add);
-    //guint timer_id63 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_Acc);
-    //guint timer_id64 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_core);
+    guint timer_id62 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapper, &message_Add);
+    guint timer_id63 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_Acc);
+    guint timer_id64 = g_timeout_add(1000, (GSourceFunc)changeLabelColorWrapperInt, &message_core);
 
     // NO PONER NADA POR ABAJO DE ACA
     gtk_widget_show_all(window);
