@@ -403,33 +403,35 @@ void button_add_clicked(GtkWidget *widget, gpointer data)
     g_print("Run!\n");
 }
 
-void saveStatsToFile(int i) {
+void saveStatsToFile(int i,FILE* file) {
 
     struct bus my_bus = *(bus_t_args.bus);
-    FILE* file = fopen("results/stats.txt", "w");  
+    
     if (file == NULL) {
         perror("Error opening file");
         return;
     }
 
     // Format and write stats to the file in the specified format
-    //fprintf(file, "PROTOCOL %d CORE %d,INV_REQ_RESP=%d,READ_REQ_RESP=%d,WRITE_REQ_RESP=%d,INCR_REQ_RESP=%d,avg_exec=%.2lf\n", 1, my_bus.cpus[i].id, my_bus.cpus[i].stats.INV, my_bus.cpus[i].stats.READ_REQ_RESP, my_bus.cpus[i].stats.WRITE_REQ_RESP, my_bus.cpus[i].stats.INCR_REQ_RESP, my_bus.cpus[i].stats.avg_exec);
-    printf("PROTOCOL %d CORE %d,INV_REQ_RESP=%d,READ_REQ_RESP=%d,WRITE_REQ_RESP=%d,INCR_REQ_RESP=%d,avg_exec=%.2lf\n", 1, my_bus.cpus[i].id, my_bus.cpus[i].stats.INV, my_bus.cpus[i].stats.READ_REQ_RESP, my_bus.cpus[i].stats.WRITE_REQ_RESP, my_bus.cpus[i].stats.INCR_REQ_RESP, my_bus.cpus[i].stats.avg_exec);
+    fprintf(file, "PROTOCOL %d CORE %d,INV_REQ_RESP=%d,READ_REQ_RESP=%d,WRITE_REQ_RESP=%d,INCR_REQ_RESP=%d,avg_exec=%.2lf\n", 1, my_bus.cpus[i].id, my_bus.cpus[i].stats.INV, my_bus.cpus[i].stats.READ_REQ_RESP, my_bus.cpus[i].stats.WRITE_REQ_RESP, my_bus.cpus[i].stats.INCR_REQ_RESP, my_bus.cpus[i].stats.avg_exec);
+    //printf("PROTOCOL %d CORE %d,INV_REQ_RESP=%d,READ_REQ_RESP=%d,WRITE_REQ_RESP=%d,INCR_REQ_RESP=%d,avg_exec=%.2lf\n", 1, my_bus.cpus[i].id, my_bus.cpus[i].stats.INV, my_bus.cpus[i].stats.READ_REQ_RESP, my_bus.cpus[i].stats.WRITE_REQ_RESP, my_bus.cpus[i].stats.INCR_REQ_RESP, my_bus.cpus[i].stats.avg_exec);
 
-    fclose(file);
+    
 }
 void button_report_clicked(GtkWidget *widget, gpointer data)
 {
-    
+    FILE* file = fopen("results/stats.txt", "w");  
     for (int i = 0; i < N_CPU; i++)
     {
-        saveStatsToFile(i);
+        saveStatsToFile(i,file);
     }
-    
+    fclose(file);
 
-    const char *command = "python src_C/graph_results.py"; 
+    const char *command = "python3 src_C/graph_results.py"; 
     // Execute the command
-    //int result = system(command);
+    int result = system(command);
+
+    
     g_print("report!\n");
 }
 

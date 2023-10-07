@@ -27,9 +27,9 @@ void execute_instruction(struct CPU *cpu, struct Instruction *instr, mqd_t mq) {
         
     }else if (strcmp(instr->op, write_char) == 0){
         if(writeCacheBlock(&cpu->cache,instr->address,instr->data,cpu->id, mq) == 1){
-            cpu->stats.WRITE_REQ_RESP++;
+            
         }
-        
+        cpu->stats.WRITE_REQ_RESP++;
     }
     else if (strcmp(instr->op, incr_char) == 0){
         //Leer dato, sumar 1 y escribir dato en memoria 

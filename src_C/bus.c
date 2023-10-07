@@ -210,7 +210,7 @@ void process_increment(int cpu_id, int block_index, struct bus *bus, int prot){
       bus->cpus[cpu_id].stats.INV++;
     }
   }
-  bus->cpus[cpu_id].stats.INV++;
+  
   
 }
 
