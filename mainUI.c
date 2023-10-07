@@ -229,8 +229,8 @@ void *cpu_thread(void *args)
 
         printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     }
-
-    
+    cpu->stats.avg_exec = (cpu->stats.avg_exec) / (cpu->stats.READ_REQ_RESP + cpu->stats.WRITE_REQ_RESP + cpu->stats.INCR_REQ_RESP);
+    printf("<<<<<<<<<<CPU - %d AVG EXECUTION TIME %3.3f seconds >>>>>>>>>>>>> \n",cpu->id, cpu->stats.avg_exec);
     return NULL;
 }
 
@@ -380,6 +380,7 @@ int main(int argc, char *argv[])
             my_bus.cpus[i].stats.INV = 0;
             my_bus.cpus[i].stats.READ_REQ_RESP = 0;
             my_bus.cpus[i].stats.WRITE_REQ_RESP = 0;
+            my_bus.cpus[i].stats.INCR_REQ_RESP = 0;
 
             cpu_thread_args_array[i].cpu = &my_bus.cpus[i];
             cpu_thread_args_array[i].mq = mq;
@@ -1062,7 +1063,7 @@ int main(int argc, char *argv[])
     {
         pthread_join(cpu_threads[i], NULL);
     }
-    pthread_join(bus_thread,NULL);
+    pthread_join(bus_t,NULL);
 
     bus_t_args.isBusActive=0;
 

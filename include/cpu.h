@@ -11,6 +11,7 @@ struct Stats{
     int INV;
     int READ_REQ_RESP;
     int WRITE_REQ_RESP;
+    int INCR_REQ_RESP;
     double avg_exec;
 };
 
