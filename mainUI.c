@@ -17,6 +17,7 @@
 #include <mqueue.h>
 
 int startProgramCondition;
+
 GtkBuilder *builder;
 GtkWidget *window, *grid, *start,
     *mainGrid,
@@ -74,7 +75,7 @@ GtkWidget *window, *grid, *start,
     *statePE4,
     *cyclesLabel,
     *cyclesNumber,
-    *selectPE,
+  
     *addressDropdown,
     *dataInput,
     *add,
@@ -108,7 +109,7 @@ GtkWidget *window, *grid, *start,
     *c3Address,
     *statePE3,
     *pe1,
-    *nextPE1,
+    *nextPE1,*currentPE3data2,
     *currentPE1,
     *labelPE1,
     *addressPE1,
@@ -167,6 +168,7 @@ GtkWidget *window, *grid, *start,
     *currentPE2data1,
     *currentPE2data2;
 
+GtkComboBox *selectPE;
 GtkWidget *label0, *label1;
 GtkWidget *event_box;
 GtkWidget *box;
@@ -612,6 +614,14 @@ int main(int argc, char *argv[])
     currentPE3data1 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data1"));
     currentPE3data2 = GTK_WIDGET(gtk_builder_get_object(builder, "currentPE3data2"));
 
+   
+    selectPE = GTK_COMBO_BOX(gtk_builder_get_object(builder, "selectPE"));
+
+    gtk_combo_box_text_append_text(selectPE,"PE1");
+    //gtk_combo_box_text_append_text(selectPE,"PE2");
+   // gtk_combo_box_text_append_text(selectPE,"PE3");
+
+
     GtkCssProvider *cssProvider = gtk_css_provider_new();
     GtkStyleContext *styleContext,
         *styleContext1,
@@ -747,7 +757,7 @@ int main(int argc, char *argv[])
     gtk_style_context_add_provider(styleContext28, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     gtk_style_context_add_provider(styleContext29, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-
+ 
     /* gtk_style_context_add_provider(styleContext2, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext3, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
      gtk_style_context_add_provider(styleContext4, GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
