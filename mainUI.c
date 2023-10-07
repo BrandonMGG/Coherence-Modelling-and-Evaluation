@@ -205,7 +205,7 @@ typedef struct
 int counter = 100;
 struct bus_thread_args bus_t_args;
 struct cpu_thread_args cpu_thread_args_array[N_CPU];
-
+volatile int stop_thread = 0;
 pthread_t cpu_threads[N_CPU];
 pthread_t bus_t;
 
@@ -216,9 +216,9 @@ void *cpu_thread(void *args)
     struct Instruction new_instruction;
     struct CPU *cpu = t_args->cpu;
     mqd_t mq = t_args->mq;
-
-    for (int i = 0; i < 10; i++)
-    {
+    
+    
+    while (!stop_thread) {
         get_random_instruction(&new_instruction);
 
         cpu->instruction = new_instruction;
@@ -229,6 +229,27 @@ void *cpu_thread(void *args)
 
         printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     }
+
+    
+    return NULL;
+}
+
+void *cpu_thread_step(void *args)
+{
+    struct cpu_thread_args *t_args = (struct cpu_thread_args *)args;
+    struct Instruction new_instruction;
+    struct CPU *cpu = t_args->cpu;
+    mqd_t mq = t_args->mq;
+
+    get_random_instruction(&new_instruction);
+
+    cpu->instruction = new_instruction;
+
+    printf("Executing instruction %s from core %d \n", new_instruction.op, cpu->id);
+    printf("%s , %s , %d \n", new_instruction.op,new_instruction.address,new_instruction.data);
+    execute_instruction(cpu, &new_instruction, mq);
+
+    printf("******CPU: %d ******INV: %d , READ: %d, WRITE: %d ************ \n", cpu->id, cpu->stats.INV, cpu->stats.READ_REQ_RESP, cpu->stats.WRITE_REQ_RESP);
     return NULL;
 }
 
@@ -296,7 +317,7 @@ gboolean changeLabelColorInt(GtkWidget *label, unsigned int text, const char *co
 
 void button_clicked(GtkWidget *widget, gpointer data)
 {
-    startProgramCondition = 1;
+    stop_thread = 0;
 
     // Crea e inicia los hilos CPU y el hilo de bus.
     for (int i = 0; i < N_CPU; i++)
@@ -306,6 +327,24 @@ void button_clicked(GtkWidget *widget, gpointer data)
     pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
 
     g_print("Button clicked!\n");
+}
+
+void button_stop_clicked(GtkWidget *widget, gpointer data)
+{
+    stop_thread = 1;
+
+    g_print("Stop!\n");
+}
+
+void button_step_clicked(GtkWidget *widget, gpointer data)
+{
+    // Crea e inicia los hilos CPU y el hilo de bus.
+    for (int i = 0; i < N_CPU; i++)
+    {
+        pthread_create(&cpu_threads[i], NULL, cpu_thread_step, (void *)&cpu_thread_args_array[i]);
+    }
+    pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
+    g_print("Step!\n");
 }
 
 int main(int argc, char *argv[])
@@ -348,7 +387,7 @@ int main(int argc, char *argv[])
         }
         //pthread_create(&bus_t, NULL, bus_thread, (void *)&bus_t_args);
 
-    g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
+    //g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
 
     // char *currentPE1 = my_bus.;
 
@@ -466,6 +505,11 @@ int main(int argc, char *argv[])
     start = GTK_WIDGET(gtk_builder_get_object(builder, "start"));
     g_signal_connect(G_OBJECT(start), "clicked", G_CALLBACK(button_clicked), NULL);
 
+    stop = GTK_WIDGET(gtk_builder_get_object(builder, "stop"));
+    g_signal_connect(G_OBJECT(stop), "clicked", G_CALLBACK(button_stop_clicked), NULL);
+
+    step = GTK_WIDGET(gtk_builder_get_object(builder, "step"));
+    g_signal_connect(G_OBJECT(step), "clicked", G_CALLBACK(button_step_clicked), NULL);
     /*=================================Botones=====================================*/
 
     a0Address = GTK_WIDGET(gtk_builder_get_object(builder, "a0Address"));
@@ -1019,7 +1063,9 @@ int main(int argc, char *argv[])
         pthread_join(cpu_threads[i], NULL);
     }
     pthread_join(bus_thread,NULL);
-    
+
+    bus_t_args.isBusActive=0;
+
     return 0;
 } // gcc -o mainUI mainUI.c `pkg-config --cflags --libs gtk+-3.0`
 // ./mainUI
