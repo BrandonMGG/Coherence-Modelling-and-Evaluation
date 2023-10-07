@@ -1,6 +1,9 @@
 #include <mqueue.h>
 #define CACHE_SIZE 4
 #define SIZE 4
+#define MEM_READ_DELAY 2
+#define MEM_INCR_DELAY 5
+#define MEM_WRITE_DELAY 4
 
 // Estados de los bloques de caché
 typedef enum {

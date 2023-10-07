@@ -20,27 +20,20 @@ void initializeCache(Cache* cache) {
 
 // Escribe un bloque en la caché
 int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
-    //mqd_t mq;
-    //mq = create_message_queue();
-    //srand(time(NULL));
+
     struct Message message;
     
     int index = 0;
     char message1[20] = " ";
     for(int i=0; i<CACHE_SIZE; i++){
+
         //Ver si existe la direccion de memoria en cache
         if(strcmp(cache->blocks[i].address, address) == 0){
+
             index = cache->blocks[i].tag;
             strcpy((char*)message1, "Write Cache Hit");
             printf("State: %d, Cache: %s\n", cache->blocks[index].state, cache->blocks[0].address);
             if((cache->blocks[index].state != MODIFIED) && (cache->blocks[index].state != EXCLUSIVE)){
-                /*enviar mensaje de message = {
-                        "id": core_name,
-                        "access": AccessType.writemiss,
-                        "address": address,
-                        "value": value,
-                        "block_id": block.get_id(),
-                    }*/
 
                 //envio del mensaje
                 message.id = id;
@@ -49,10 +42,11 @@ int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq
                 message.value = data;
                 message.block_id = i;
                 printf("Write esta en Modified o Exclusive\n");
+
                 // Send the message to the queue
                 send_message(mq, &message);
-                // Sleep briefly to simulate processing time
-                sleep(4); // Sleep for 2 s
+                
+                sleep(MEM_WRITE_DELAY);
 
                 return -1;
                 
@@ -66,18 +60,6 @@ int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq
                 return 1;
                 
             }
-            //break;
-        }else{
-            //no existe en cache
-            /*enviar mensaje de message = {
-                    "id": core_name,
-                    "access": AccessType.writemiss,
-                    "address": address,
-                    "value": value,
-                    "block_id": self._get_block_id_with_writing_policy(address),
-                }*/
-            
-            //break;
             
         }
         
@@ -91,9 +73,7 @@ int writeCacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq
     printf("Write no esta en cache\n");
             // Send the message to the queue
     send_message(mq, &message);
-            // Sleep briefly to simulate processing time
-    sleep(4); // Sleep for 2 s
-
+    sleep(MEM_WRITE_DELAY);
             
             
     strcpy((char*)message1, "Write Cache Miss");
@@ -118,14 +98,7 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
                 sev=1;
                 break;
             }else{
-                //si existe pero esta en Invalid
-                /*enviar mensaje de message = {
-                        "id": core_name,
-                        "access": AccessType.readmiss,
-                        "address": address,
-                        "value": value,
-                        "block_id": block_id,
-                    }*/
+
                 //envio del mensaje
                 message.id = id;
                 message.access = 0;
@@ -135,26 +108,12 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
                 // Send the message to the queue
                 send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(4); // Sleep for 2 s
+                sleep(MEM_READ_DELAY);
                 strcpy((char*)message2, "Read Cache Miss");
                 
                 break;
             }
-        }else{
-            //no existe en cache
-            /*enviar mensaje de message = {
-                    "id": core_name,
-                    "access": AccessType.readmiss,
-                    "address": address,
-                    "value": value,
-                    "block_id": self._get_block_id_with_writing_policy(address),
-                }*/
-            //envio del mensaje
-            
-            
-            //break;
         }
-        
     }
     if(sev == 0){
         message.id = id;
@@ -162,10 +121,10 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
         snprintf(message.address, sizeof(message.address), "%s", address);
         message.block_id = getBlockIdWithWriteBackPolicy(cache);
         printf("Read no esta en cache\n");
-                // Send the message to the queue
+        // Send the message to the queue
         send_message(mq, &message);
-                // Sleep briefly to simulate processing time
-        sleep(4); // Sleep for 2 s
+                
+        sleep(MEM_READ_DELAY);
 
         strcpy((char*)message2, "Read Cache Miss");
     }
@@ -174,27 +133,19 @@ int readCacheBlock(Cache* cache, char address[SIZE], int id, mqd_t mq) {
 }
 
 int write_INCR_CacheBlock(Cache* cache, char address[SIZE], int data, int id, mqd_t mq) {
-    //mqd_t mq;
-    //mq = create_message_queue();
-    //srand(time(NULL));
-struct Message message;
+
+    struct Message message;
     
     int index = 0;
     char message1[20] = " ";
     for(int i=0; i<CACHE_SIZE; i++){
+
         //Ver si existe la direccion de memoria en cache
         if(strcmp(cache->blocks[i].address, address) == 0){
             index = cache->blocks[i].tag;
             strcpy((char*)message1, "Write Cache Hit");
             printf("State: %d, Cache: %s\n", cache->blocks[index].state, cache->blocks[0].address);
             if((cache->blocks[index].state != MODIFIED) && (cache->blocks[index].state != EXCLUSIVE)){
-                /*enviar mensaje de message = {
-                        "id": core_name,
-                        "access": AccessType.writemiss,
-                        "address": address,
-                        "value": value,
-                        "block_id": block.get_id(),
-                    }*/
 
                 //envio del mensaje
                 message.id = id;
@@ -206,7 +157,7 @@ struct Message message;
                 // Send the message to the queue
                 send_message(mq, &message);
                 // Sleep briefly to simulate processing time
-                sleep(4); // Sleep for 2 s
+                sleep(MEM_INCR_DELAY); // Sleep for 2 s
 
                 return -1;
                 
@@ -220,19 +171,6 @@ struct Message message;
                 return 1;
                 
             }
-            //break;
-        }else{
-            //no existe en cache
-            /*enviar mensaje de message = {
-                    "id": core_name,
-                    "access": AccessType.writemiss,
-                    "address": address,
-                    "value": value,
-                    "block_id": self._get_block_id_with_writing_policy(address),
-                }*/
-            
-            //break;
-            
         }
         
     }
@@ -243,13 +181,11 @@ struct Message message;
     message.block_id = getBlockIdWithWriteBackPolicy(cache);
     message.value = data;
     printf("Write no esta en cache\n");
-            // Send the message to the queue
+            
     send_message(mq, &message);
-            // Sleep briefly to simulate processing time
-    sleep(4); // Sleep for 2 s
-
             
-            
+    sleep(MEM_INCR_DELAY);
+    
     strcpy((char*)message1, "Write Cache Miss");
     return -1;
 }
